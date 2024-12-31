@@ -4,7 +4,7 @@ import React from "react";
 function StreamList() {
     const [streams, setStreams] = React.useState<(string | null)[]>([]);  
     React.useEffect(() => {
-      fetch("http://5.75.179.226:8080/stat")
+      fetch("https://api.firmsnap.com/stat")
         .then(resp => resp.text())
         .then(xmlStr => {
           const parser = new DOMParser();
@@ -43,11 +43,10 @@ function StreamList() {
     return (
       <ul>
         {streams.map(name => (
-          <li key={name}>{name}</li>
+          <li key={name}><a href={`https://api.firmsnap.com/hls/${name}.m3u8`} target="_blank" rel="noopener noreferrer">{name}</a></li>
         ))}
       </ul>
     );
   }
   
   export default StreamList;
-  
