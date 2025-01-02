@@ -4,7 +4,7 @@ import React from "react";
 function StreamList() {
     const [streams, setStreams] = React.useState<(string | null)[]>([]);  
     React.useEffect(() => {
-      fetch("https://api.firmsnap.com/stat")
+      fetch("https://api.firmsnap.com/rtmp/stat")
         .then(resp => resp.text())
         .then(xmlStr => {
           const parser = new DOMParser();
