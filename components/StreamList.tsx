@@ -23,7 +23,7 @@ function StreamList() {
       {streams.map((name) => (
         <li key={name}>
           <a
-            href={`https://api.firmsnap.com/hls/${name}.m3u8`}
+            href={`/${name}`}
             target="_blank"
             rel="noopener noreferrer"
           >
