@@ -42,9 +42,11 @@ export default function LoginPage() {
       document.cookie = `authToken=${token}; expires=${expirationDate.toUTCString()}; path=/; Secure; SameSite=Strict`;
 
       window.location.href = "/";
-    } catch (err: any) {
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Login failed:", err.message);
+      }
       setError("Invalid email or password. Please try again.");
-      console.error("Login failed:", err.response?.data || err.message);
     }
   };
 
@@ -56,7 +58,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle>Log in to your account</CardTitle>
             <p className="text-gray-600">
-              Don't have an account? Sign up for an account now.
+              Don&#39;t have an account? Sign up for an account now.
             </p>
           </CardHeader>
           <CardContent>
