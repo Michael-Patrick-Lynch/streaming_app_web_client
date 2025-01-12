@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, use } from 'react';
 import Hls from 'hls.js';
+import LiveChat from '@/components/LiveChat';
 
 interface PageParams {
   params: Promise<{
@@ -57,6 +58,10 @@ export default function VideoStreamPage({ params }: PageParams) {
           controls
           playsInline
         />
+      </div>
+
+      <div className="w-80">
+        <LiveChat streamerName={name} />
       </div>
     </div>
   );
