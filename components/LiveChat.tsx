@@ -1,38 +1,42 @@
-"use client";
+'use client';
 
-import { Socket } from "phoenix";
-import { useEffect, useState } from "react";
+import { Channel, Socket } from 'phoenix';
+import { useEffect, useState } from 'react';
 
 interface LiveChatProps {
   streamerName: string;
 }
 
+interface MessagePayload {
+  body: string;
+}
+
 export default function LiveChat({ streamerName }: LiveChatProps) {
   const [messages, setMessages] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [channel, setChannel] = useState<any>(null);
+  const [inputValue, setInputValue] = useState('');
+  const [channel, setChannel] = useState<Channel | null>(null);
 
   useEffect(() => {
-    let socket = new Socket("wss://api.firmsnap.com/socket")
-    console.log("Will now attempt to open the socket")
-    socket.onOpen(() => console.log("Socket opened."));
-    socket.onClose(() => console.log("Socket closed."));
-    socket.onError((err) => console.log("Socket error:", err));
+    const socket = new Socket('wss://api.firmsnap.com/socket');
+    console.log('Will now attempt to open the socket');
+    socket.onOpen(() => console.log('Socket opened.'));
+    socket.onClose(() => console.log('Socket closed.'));
+    socket.onError((err) => console.log('Socket error:', err));
 
     socket.connect();
 
     // Join the channel for this streamer
     const c = socket.channel(`streamer:${streamerName}`, {});
     c.join()
-      .receive("ok", (resp: any) => {
-        console.log("Joined streamer channel successfully:", resp);
+      .receive('ok', (resp: Record<string, unknown>) => {
+        console.log('Joined streamer channel successfully:', resp);
       })
-      .receive("error", (resp: any) => {
-        console.error("Unable to join streamer channel:", resp);
+      .receive('error', (resp: Record<string, unknown>) => {
+        console.error('Unable to join streamer channel:', resp);
       });
 
     // Listen for new messages
-    c.on("new_msg", (payload: any) => {
+    c.on('new_msg', (payload: MessagePayload) => {
       setMessages((prev) => [...prev, payload.body]);
     });
 
@@ -47,8 +51,8 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
 
   const handleSend = () => {
     if (!channel || !inputValue.trim()) return;
-    channel.push("new_msg", { body: inputValue });
-    setInputValue("");
+    channel.push('new_msg', { body: inputValue });
+    setInputValue('');
   };
 
   return (

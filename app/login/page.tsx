@@ -1,39 +1,42 @@
-'use client'
-import * as React from "react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+'use client';
+import * as React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import axios from "axios";
-import { useUser } from "@/context/UserContext";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import axios from 'axios';
+import { useUser } from '@/context/UserContext';
 
 export default function LoginPage() {
   const { setCurrentUser } = useUser();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null); // Clear previous errors
-    console.log(email)
-    console.log(password)
+    console.log(email);
+    console.log(password);
 
     try {
-      const response = await axios.post("https://api.firmsnap.com/users/log_in", {
-        user: { email, password },
-      });
+      const response = await axios.post(
+        'https://api.firmsnap.com/users/log_in',
+        {
+          user: { email, password },
+        }
+      );
 
       const { token, user } = response.data;
 
-      localStorage.setItem("authToken", token);
+      localStorage.setItem('authToken', token);
       setCurrentUser(user);
 
       const expirationDays = 7;
@@ -41,12 +44,12 @@ export default function LoginPage() {
       expirationDate.setDate(expirationDate.getDate() + expirationDays);
       document.cookie = `authToken=${token}; expires=${expirationDate.toUTCString()}; path=/; Secure; SameSite=Strict`;
 
-      window.location.href = "/";
+      window.location.href = '/';
     } catch (err) {
       if (err instanceof Error) {
-        console.error("Login failed:", err.message);
+        console.error('Login failed:', err.message);
       }
-      setError("Invalid email or password. Please try again.");
+      setError('Invalid email or password. Please try again.');
     }
   };
 

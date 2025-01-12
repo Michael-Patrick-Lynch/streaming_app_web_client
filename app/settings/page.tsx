@@ -1,16 +1,15 @@
-import * as React from "react"
+import * as React from 'react';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function SettingsPage() {
   return (
@@ -18,7 +17,9 @@ export default function SettingsPage() {
       {/* Header Section */}
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold">Account Settings</h1>
-        <p className="text-gray-600">Manage your account email address and password settings</p>
+        <p className="text-gray-600">
+          Manage your account email address and password settings
+        </p>
       </div>
 
       {/* Cards Section */}
@@ -33,11 +34,11 @@ export default function SettingsPage() {
               <div className="grid gap-4">
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="current-email">Current Email</Label>
-                  <Input id="current-email"/>
+                  <Input id="current-email" />
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="email-password">Password</Label>
-                  <Input id="email-password" type="password"/>
+                  <Input id="email-password" type="password" />
                 </div>
               </div>
             </form>
@@ -57,15 +58,15 @@ export default function SettingsPage() {
               <div className="grid gap-4">
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="current-password">Current Password</Label>
-                  <Input id="current-password" type="password"/>
+                  <Input id="current-password" type="password" />
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password"/>
+                  <Input id="new-password" type="password" />
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input id="confirm-password" type="password"/>
+                  <Input id="confirm-password" type="password" />
                 </div>
               </div>
             </form>
@@ -78,4 +79,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

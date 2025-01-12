@@ -1,6 +1,6 @@
-'use client'
-import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+'use client';
+import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface User {
   id: string;
@@ -21,11 +21,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get("https://api.firmsnap.com/me", {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        const token = localStorage.getItem('authToken');
+        const response = await axios.get('https://api.firmsnap.com/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
         setCurrentUser(response.data.user);
       } catch {
@@ -45,6 +45,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
+  if (!context) throw new Error('useUser must be used within a UserProvider');
   return context;
 };

@@ -52,12 +52,7 @@ export default function VideoStreamPage({ params }: PageParams) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
       <div className="w-full max-w-4xl aspect-video">
-        <video
-          ref={videoRef}
-          className="w-full h-full"
-          controls
-          playsInline
-        />
+        <video ref={videoRef} className="w-full h-full" controls playsInline />
       </div>
 
       <div className="w-80">

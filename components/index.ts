@@ -1,1 +1,1 @@
-export { default as StreamList } from './StreamList'
+export { default as StreamList } from './StreamList';
