@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, use } from 'react';
-import Hls from 'hls.js';
+import React, { useState, useEffect, use } from 'react';
+import dynamic from 'next/dynamic';
 import LiveChat from '@/components/LiveChat';
 
 interface PageParams {
@@ -10,49 +10,43 @@ interface PageParams {
   }>;
 }
 
+// Dynamically import ReactPlayer for client-side rendering
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
+
 export default function VideoStreamPage({ params }: PageParams) {
+  const [isClient, setIsClient] = useState(false);
   const resolvedParams = use(params);
   const { name } = resolvedParams;
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamUrl = `https://api.firmsnap.com/hls/${name}.m3u8`;
 
+  // Ensure component is only rendered on the client
   useEffect(() => {
-    const video = videoRef.current;
+    setIsClient(true);
+  }, []);
 
-    if (video) {
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          debug: false,
-        });
-
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch((error: Error) => {
-            console.log('Playback failed:', error);
-          });
-        });
-
-        return () => {
-          hls.destroy();
-        };
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = streamUrl;
-        video.addEventListener('loadedmetadata', () => {
-          video.play().catch((error: Error) => {
-            console.log('Playback failed:', error);
-          });
-        });
-      }
-    }
-  }, [streamUrl]);
+  if (!isClient) {
+    return null; // Prevent rendering until client-side
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
       <div className="w-full max-w-4xl aspect-video">
-        <video ref={videoRef} className="w-full h-full" controls playsInline />
+        <ReactPlayer
+          url={streamUrl}
+          playing
+          muted
+          controls
+          width="100%"
+          height="100%"
+          config={{
+            file: {
+              attributes: {
+                playsInline: true,
+              },
+            },
+          }}
+        />
       </div>
 
       <div className="w-80">
