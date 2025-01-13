@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import dynamic from 'next/dynamic';
 import LiveChat from '@/components/LiveChat';
+import StreamDescriptionCard from '@/components/StreamDescriptionCard';
 
 interface PageParams {
   params: Promise<{
@@ -30,26 +31,33 @@ export default function VideoStreamPage({ params }: PageParams) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black">
-      <div className="w-full max-w-4xl aspect-video">
-        <ReactPlayer
-          url={streamUrl}
-          playing
-          muted
-          controls
-          width="100%"
-          height="100%"
-          config={{
-            file: {
-              attributes: {
-                playsInline: true,
+    <div className="flex flex-col lg:flex-row">
+      {/* Video Player and Description */}
+      <div className="flex-1">
+        <div className="w-full aspect-video">
+          <ReactPlayer
+            url={streamUrl}
+            playing
+            muted
+            controls
+            width="100%"
+            height="100%"
+            config={{
+              file: {
+                attributes: {
+                  playsInline: true,
+                },
               },
-            },
-          }}
-        />
+            }}
+          />
+        </div>
+        <div className="w-full">
+          <StreamDescriptionCard streamerName={name} />
+        </div>
       </div>
 
-      <div className="w-80">
+      {/* Live Chat */}
+      <div className="w-full lg:w-1/3">
         <LiveChat streamerName={name} />
       </div>
     </div>

@@ -56,7 +56,7 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
   };
 
   return (
-    <div className="p-4 text-white bg-gray-800 max-w-md">
+    <div className="p-4 text-white bg-gray-800 h-full">
       <h2 className="font-bold mb-2">Live Chat for: {streamerName}</h2>
       <div className="border border-gray-700 p-2 h-48 overflow-y-auto mb-2">
         {messages.map((msg, idx) => (
@@ -67,7 +67,7 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
       </div>
       <div className="flex">
         <input
-          className="flex-1 border border-gray-700 p-1 text-black"
+          className="flex-1 border border-gray-700 p-1 text-black max-w-sm"
           type="text"
           placeholder="Say something..."
           value={inputValue}

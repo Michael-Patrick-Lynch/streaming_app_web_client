@@ -31,11 +31,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <UserProvider>
-          <div className="top-0 left-0 w-full z-50">
-            <Navbar />
+          <div className="flex min-h-screen">
+            <div className="fixed top-0 left-0 w-64 h-full z-50 bg-gray-900">
+              <Navbar />
+              <RecommendedChannels />
+            </div>
+
+            <div className="ml-64 flex-1">
+              <div className="mt-16">{children}</div>
+            </div>
           </div>
-          {children}
-          <RecommendedChannels/>
         </UserProvider>
       </body>
     </html>
