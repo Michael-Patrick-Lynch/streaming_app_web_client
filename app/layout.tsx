@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { UserProvider } from '@/context/UserContext';
+import RecommendedChannels from '@/components/RecommendedChannels';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,6 +35,7 @@ export default function RootLayout({
             <Navbar />
           </div>
           {children}
+          <RecommendedChannels/>
         </UserProvider>
       </body>
     </html>

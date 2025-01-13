@@ -2,7 +2,7 @@ import React from 'react';
 
 export function Navbar() {
   return (
-    <nav className="w-full h-16 bg-gray-800 text-white flex items-center px-8">
+    <nav className="w-full h-16 bg-gray-800 text-white flex items-center px-8 fixed top-0">
       <div className="text-lg font-bold">My Stream Site</div>
       <ul className="flex ml-auto space-x-6">
         <li>
