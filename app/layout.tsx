@@ -32,12 +32,15 @@ export default function RootLayout({
       >
         <UserProvider>
           <div className="flex min-h-screen">
-            <div className="fixed top-0 left-0 w-64 h-full z-50 bg-gray-900">
+            <div className="fixed top-0 left-0 w-full h-16 z-50 bg-gray-900">
               <Navbar />
+            </div>
+
+            <div className="hidden lg:block fixed top-16 left-0 w-64 h-full z-40 bg-gray-900">
               <RecommendedChannels />
             </div>
 
-            <div className="ml-64 flex-1">
+            <div className="lg:ml-64 flex-1">
               <div className="mt-16">{children}</div>
             </div>
           </div>
