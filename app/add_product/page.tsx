@@ -43,21 +43,20 @@ export default function AddNewProductForm() {
         description,
       };
       console.log('Adding product with params:', params);
-    //   const res = await axios.post("https://api.firmsnap.com/shop", params, {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     })
-    // console.log("result from /shop:", res)
-    
+      //   const res = await axios.post("https://api.firmsnap.com/shop", params, {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //     })
+      // console.log("result from /shop:", res)
 
       const response = await axios.post(
         'https://api.firmsnap.com/shop/product',
         params,
         {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       console.error('Adding product succeeded, response:', response);
@@ -82,7 +81,7 @@ export default function AddNewProductForm() {
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4">
                 {error && <p className="text-red-500">{error}</p>}
-                
+
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="product-name">Product Name</Label>
                   <Input
