@@ -37,7 +37,7 @@ export default function AddNewProductForm() {
       const params = {
         shop_id: currentUser.id,
         name,
-        price: parseFloat(priceInEuro),
+        price_in_euro: parseFloat(priceInEuro) * 100,
         quantity: parseInt(quantity),
         picture_url: pictureUrl,
         description,
