@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
+import { useRouter } from 'next/navigation';
 
 export default function AddNewProductForm() {
   const { currentUser } = useUser();
@@ -23,12 +24,13 @@ export default function AddNewProductForm() {
   const [pictureUrl, setPictureUrl] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter(); // for client side routing (prevents the app from remounting)
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     if (!currentUser) {
-      window.location.href = '/login';
+      router.push('/login');
       return;
     }
 
@@ -50,18 +52,13 @@ export default function AddNewProductForm() {
       //     })
       // console.log("result from /shop:", res)
 
-      const response = await axios.post(
-        'https://api.firmsnap.com/shop/product',
-        params,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.error('Adding product succeeded, response:', response);
+      await axios.post('https://api.firmsnap.com/shop/product', params, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      window.location.href = '/';
+      router.push('/');
     } catch (err) {
       if (err instanceof Error) {
         console.error('Adding product failed:', err.message);

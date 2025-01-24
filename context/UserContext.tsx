@@ -22,6 +22,10 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem('authToken');
+        if (!token) {
+          setCurrentUser(null);
+          return;
+        }
         const response = await axios.get('https://api.firmsnap.com/me', {
           headers: {
             Authorization: `Bearer ${token}`,

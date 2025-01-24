@@ -1,6 +1,6 @@
 'use client';
-
 import React from 'react';
+import Link from 'next/link';
 
 function StreamList() {
   const [streams, setStreams] = React.useState<string[]>([]);
@@ -24,9 +24,9 @@ function StreamList() {
     <ul>
       {streams.map((name) => (
         <li key={name}>
-          <a href={`/${name}`} target="_blank" rel="noopener noreferrer">
+          <Link href={`/${name}`} target="_blank" rel="noopener noreferrer">
             {name}
-          </a>
+          </Link>
         </li>
       ))}
     </ul>

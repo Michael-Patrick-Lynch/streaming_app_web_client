@@ -13,12 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const { setCurrentUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,7 +46,7 @@ export default function LoginPage() {
       expirationDate.setDate(expirationDate.getDate() + expirationDays);
       document.cookie = `authToken=${token}; expires=${expirationDate.toUTCString()}; path=/; Secure; SameSite=Strict`;
 
-      window.location.href = '/';
+      router.push('/');
     } catch (err) {
       if (err instanceof Error) {
         console.error('Login failed:', err.message);
