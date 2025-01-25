@@ -2,7 +2,7 @@
 
 import { useUser } from '@/context/UserContext';
 import { Channel, Socket, Presence } from 'phoenix';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface LiveChatProps {
   streamerName: string;
@@ -11,16 +11,19 @@ interface LiveChatProps {
 interface MessagePayload {
   body: string;
 }
-
 export default function LiveChat({ streamerName }: LiveChatProps) {
   const [messages, setMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [channel, setChannel] = useState<Channel | null>(null);
   const [liveViewerCount, setLiveViewerCount] = useState<number>(0);
   const { currentUser } = useUser();
-  const userId = currentUser
-    ? currentUser.id
-    : `anon_${Math.floor(Math.random() * 100000)}`;
+
+  // userId calculation is using useMemo to prevent it changing on every render
+  const userId = useMemo(() => {
+    return currentUser
+      ? currentUser.id
+      : `anon_${Math.floor(Math.random() * 100000)}`;
+  }, [currentUser]); // Only recalculate when currentUser changes
 
   useEffect(() => {
     const socket = new Socket('wss://api.firmsnap.com/socket');
