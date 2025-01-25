@@ -1,6 +1,7 @@
 'use client';
 
-import { Channel, Socket } from 'phoenix';
+import { useUser } from '@/context/UserContext';
+import { Channel, Socket, Presence } from 'phoenix';
 import { useEffect, useState } from 'react';
 
 interface LiveChatProps {
@@ -15,6 +16,11 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
   const [messages, setMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [channel, setChannel] = useState<Channel | null>(null);
+  const [liveViewerCount, setLiveViewerCount] = useState<number>(0);
+  const { currentUser } = useUser();
+  const userId = currentUser
+    ? currentUser.id
+    : `anon_${Math.floor(Math.random() * 100000)}`;
 
   useEffect(() => {
     const socket = new Socket('wss://api.firmsnap.com/socket');
@@ -22,11 +28,10 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
     socket.onOpen(() => console.log('Socket opened.'));
     socket.onClose(() => console.log('Socket closed.'));
     socket.onError((err) => console.log('Socket error:', err));
-
     socket.connect();
 
     // Join the channel for this streamer
-    const c = socket.channel(`streamer:${streamerName}`, {});
+    const c = socket.channel(`streamer:${streamerName}`, { user_id: userId });
     c.join()
       .receive('ok', (resp: Record<string, unknown>) => {
         console.log('Joined streamer channel successfully:', resp);
@@ -40,6 +45,13 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
       setMessages((prev) => [...prev, payload.body]);
     });
 
+    // --- PRESENCE SETUP ---
+    const presence = new Presence(c);
+    presence.onSync(() => {
+      const presenceList = presence.list();
+      setLiveViewerCount(Object.keys(presenceList).length);
+    });
+
     setChannel(c);
 
     // Cleanup when unmounting or streamerName changes
@@ -47,7 +59,7 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
       c.leave();
       socket.disconnect();
     };
-  }, [streamerName]);
+  }, [streamerName, userId]);
 
   const handleSend = () => {
     if (!channel || !inputValue.trim()) return;
@@ -58,6 +70,10 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
   return (
     <div className="p-4 text-white bg-gray-800 h-full">
       <h2 className="font-bold mb-2">Live Chat for: {streamerName}</h2>
+      {/* Display the viewer count */}
+      <div className="mb-2">
+        <span>Current Viewers: {liveViewerCount}</span>
+      </div>
       <div className="border border-gray-700 p-2 h-48 overflow-y-auto mb-2">
         {messages.map((msg, idx) => (
           <div key={idx} className="mb-1">
