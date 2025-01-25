@@ -6,6 +6,7 @@ interface User {
   id: string;
   email: string;
   username: string;
+  is_seller: boolean;
 }
 
 interface UserContextValue {
