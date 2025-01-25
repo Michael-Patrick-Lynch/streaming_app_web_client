@@ -1,10 +1,5 @@
 import * as React from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ContactPage() {
   return (
@@ -22,11 +17,11 @@ export default function ContactPage() {
             <CardTitle>Email</CardTitle>
           </CardHeader>
           <CardContent>
-              <div className="grid gap-2">
-                <div className="flex flex-col space-y-1.5">
-                  <p>founders@firmsnap.com</p>
-                </div>
+            <div className="grid gap-2">
+              <div className="flex flex-col space-y-1.5">
+                <p>founders@firmsnap.com</p>
               </div>
+            </div>
           </CardContent>
         </Card>
       </div>

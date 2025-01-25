@@ -12,7 +12,9 @@ export default function Home() {
           <div>List of links to active streams:</div>
           <StreamList />
           {currentUser && <p>Welcome {currentUser.username}</p>}
-          {currentUser && <p>Is seller: {currentUser.is_seller ? 'Yes' : 'No'}</p>}
+          {currentUser && (
+            <p>Is seller: {currentUser.is_seller ? 'Yes' : 'No'}</p>
+          )}
           <RecommendedChannels />
         </main>
       </div>

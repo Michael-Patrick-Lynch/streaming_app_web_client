@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
@@ -31,7 +31,7 @@ export function Navbar() {
         >
           Contact
         </Link>
-        
+
         {currentUser ? (
           <>
             {currentUser.is_seller && (
@@ -82,7 +82,7 @@ export function Navbar() {
             >
               Contact
             </Link>
-            
+
             {currentUser ? (
               <>
                 {currentUser.is_seller && (
