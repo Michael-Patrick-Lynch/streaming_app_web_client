@@ -26,12 +26,6 @@ export function Navbar() {
           About
         </Link>
         <Link
-          href="/help" 
-          className="text-gray-300 hover:text-white hover:underline"
-        >
-          Help
-        </Link>
-        <Link
           href="/contact"
           className="text-gray-300 hover:text-white hover:underline"
         >
@@ -81,12 +75,6 @@ export function Navbar() {
               className="block py-2 text-gray-300 hover:text-white"
             >
               About
-            </Link>
-            <Link
-              href="/help"
-              className="block py-2 text-gray-300 hover:text-white"
-            >
-              Help
             </Link>
             <Link
               href="/contact"
