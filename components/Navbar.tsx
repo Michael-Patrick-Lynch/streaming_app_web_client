@@ -1,14 +1,15 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
 export function Navbar() {
   const { currentUser } = useUser();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="w-full h-16 bg-gray-800 text-white flex items-center px-8 fixed top-0">
+    <nav className="w-full h-16 bg-gray-800 text-white flex items-center px-4 sm:px-8 fixed top-0">
       {/* Logo - always shown */}
       <div className="text-lg font-bold">
         <Link href="/" className="hover:underline">
@@ -16,75 +17,108 @@ export function Navbar() {
         </Link>
       </div>
 
-      {/* Burger menu - moved next to logo */}
-      <div className="relative ml-4">
-        <button
-          className="p-2 hover:bg-gray-700 rounded-full group"
-          aria-label="More options"
+      {/* Desktop Navigation */}
+      <div className="hidden md:flex ml-auto space-x-6 items-center">
+        <Link
+          href="/about"
+          className="text-gray-300 hover:text-white hover:underline"
         >
-          <Menu
-            size={24}
-            className="group-hover:text-gray-300"
-            data-tooltip-id="navbar-tooltip"
-            data-tooltip-content="More Options"
-          />
-          <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 hidden group-hover:block">
+          About
+        </Link>
+        <Link
+          href="/help" 
+          className="text-gray-300 hover:text-white hover:underline"
+        >
+          Help
+        </Link>
+        <Link
+          href="/contact"
+          className="text-gray-300 hover:text-white hover:underline"
+        >
+          Contact
+        </Link>
+        
+        {currentUser ? (
+          <>
+            {currentUser.is_seller && (
+              <Link href="/manage-shop" className="hover:underline">
+                Manage Shop
+              </Link>
+            )}
+            <Link href="/settings" className="hover:underline">
+              Settings
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link href="/login" className="hover:underline">
+              Log In
+            </Link>
+            <Link href="/signup" className="hover:underline">
+              Sign Up
+            </Link>
+          </>
+        )}
+      </div>
+
+      {/* Mobile menu button */}
+      <div className="ml-auto md:hidden">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 hover:bg-gray-700 rounded-full"
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="absolute top-16 left-0 right-0 bg-gray-800 md:hidden">
+          <div className="px-4 py-2 space-y-2">
             <Link
               href="/about"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+              className="block py-2 text-gray-300 hover:text-white"
             >
               About
             </Link>
             <Link
               href="/help"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+              className="block py-2 text-gray-300 hover:text-white"
             >
               Help
             </Link>
             <Link
               href="/contact"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+              className="block py-2 text-gray-300 hover:text-white"
             >
               Contact
             </Link>
-          </div>
-        </button>
-      </div>
-
-      {/* Navigation links */}
-      <ul className="flex ml-auto space-x-6 items-center">
-        {currentUser ? (
-          // Logged in user
-          <>
-            {currentUser.is_seller && (
-              <li>
-                <Link href="/manage-shop" className="hover:underline">
-                  Manage Shop
+            
+            {currentUser ? (
+              <>
+                {currentUser.is_seller && (
+                  <Link href="/manage-shop" className="block py-2">
+                    Manage Shop
+                  </Link>
+                )}
+                <Link href="/settings" className="block py-2">
+                  Settings
                 </Link>
-              </li>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="block py-2">
+                  Log In
+                </Link>
+                <Link href="/signup" className="block py-2">
+                  Sign Up
+                </Link>
+              </>
             )}
-            <li>
-              <Link href="/settings" className="hover:underline">
-                Settings
-              </Link>
-            </li>
-          </>
-        ) : (
-          // Not logged in
-          <>
-            <li>
-              <Link href="/login" className="hover:underline">
-                Log In
-              </Link>
-            </li>
-            <li>
-              <Link href="/signup" className="hover:underline">
-                Sign Up
-              </Link>
-            </li>
-          </>
-        )}
-      </ul>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
