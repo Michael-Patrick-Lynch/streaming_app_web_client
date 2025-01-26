@@ -21,6 +21,21 @@ export default function ManageShopPage() {
   const [error, setError] = useState<string | null>(null);
   const streamerName = currentUser?.username;
 
+  const handleDelete = async (productId: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.delete(`https://api.firmsnap.com/shop/product/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setProducts(products.filter((product) => product.id !== productId));
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      setError('Failed to delete product');
+    }
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -84,6 +99,12 @@ export default function ManageShopPage() {
                         {product.description}
                       </p>
                     )}
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="mt-2 text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </Card>
                 ))}
               </div>
