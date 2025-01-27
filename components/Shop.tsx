@@ -55,7 +55,7 @@ export default function Shop({ streamerName }: ShopProps) {
             {product.picture_url && (
               <div className="relative w-full h-48 mb-3">
                 <Image
-                  src={product.picture_url}
+                  src={`https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/${product.picture_url}`}
                   alt={product.name}
                   fill
                   className="object-cover rounded-md"

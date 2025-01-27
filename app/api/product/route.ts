@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       name: productData.name,
       price_in_euro: productData.price_in_euro,
       quantity: productData.quantity,
-      picture_url: `${process.env.CLOUDFLARE_R2_ENDPOINT}/${uniqueFilename}`,
+      picture_url: uniqueFilename,
       description: productData.description, // Only include if it exists
     };
 

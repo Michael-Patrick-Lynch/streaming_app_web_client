@@ -59,7 +59,7 @@ export default function AddNewProductForm() {
         },
       });
 
-      router.push('/');
+      router.push('/manage-shop');
     } catch (err) {
       if (err instanceof Error) {
         console.error('Adding product failed:', err.message);

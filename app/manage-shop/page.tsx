@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import Link from 'next/link';
 
 interface Product {
   id: number;
@@ -60,12 +61,17 @@ export default function ManageShopPage() {
     );
   }
 
+  console.log(products);
+
   return (
     <div className="min-h-screen px-4 py-8 flex flex-col items-center">
       {/* Header Section */}
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold">Manage Your Shop</h1>
         <p className="text-gray-600">Add, remove or edit your products</p>
+        <Link href="/add-product" className="hover:underline">
+          Add Product
+        </Link>
       </div>
       <div className="flex flex-col gap-8 w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl">
         <Card>
@@ -77,7 +83,7 @@ export default function ManageShopPage() {
                     {product.picture_url && (
                       <div className="relative w-full h-48 mb-3">
                         <Image
-                          src={product.picture_url}
+                          src={`https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/${product.picture_url}`}
                           alt={product.name}
                           fill
                           className="object-cover rounded-md"
