@@ -21,7 +21,7 @@ export default function AddNewProductForm() {
   const [name, setName] = useState('');
   const [priceInEuro, setPriceInEuro] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [pictureUrl, setPictureUrl] = useState('');
+  const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // for client side routing (prevents the app from remounting)
@@ -36,25 +36,26 @@ export default function AddNewProductForm() {
 
     try {
       const token = localStorage.getItem('authToken');
-      const params = {
-        shop_id: currentUser.id,
-        name,
-        price_in_euro: parseFloat(priceInEuro) * 100,
-        quantity: parseInt(quantity),
-        picture_url: pictureUrl,
-        description,
-      };
-      console.log('Adding product with params:', params);
-      //   const res = await axios.post("https://api.firmsnap.com/shop", params, {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //     })
-      // console.log("result from /shop:", res)
+      const formData = new FormData();
+      formData.append(
+        'productData',
+        JSON.stringify({
+          name,
+          price_in_euro: parseFloat(priceInEuro) * 100,
+          quantity: parseInt(quantity),
+          description,
+        })
+      );
+      if (pictureFile) {
+        formData.append('file', pictureFile);
+      }
+      formData.append('token', token || '');
 
-      await axios.post('https://api.firmsnap.com/shop/product', params, {
+      console.log('Adding product with formData:', formData);
+
+      await axios.post('/api/product', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
 
@@ -115,12 +116,14 @@ export default function AddNewProductForm() {
                 </div>
 
                 <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="picture-url">Picture URL (optional)</Label>
+                  <Label htmlFor="picture-file">Picture File (optional)</Label>
                   <Input
-                    id="picture-url"
-                    type="url"
-                    value={pictureUrl}
-                    onChange={(e) => setPictureUrl(e.target.value)}
+                    id="picture-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setPictureFile(e.target.files?.[0] || null)
+                    }
                   />
                 </div>
 

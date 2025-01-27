@@ -7,19 +7,30 @@ interface ProductData {
   price_in_euro: number;
   quantity: number;
   picture_url: string;
-  description?: string;
+  description: string;
 }
 
-// Sends request to create product record in the DB, if that succeed then uploads image to S3 bucket
 export async function POST(req: Request) {
-  const token = 'placeholder token, will need to be sent in params';
-  const {
-    productData,
-    file: imageFile,
-  }: { productData: ProductData; file: File } = await req.json();
+  const formData = await req.formData();
+
+  const productDataString = formData.get('productData');
+  const productData: ProductData = productDataString
+    ? JSON.parse(productDataString as string)
+    : null;
+
+  const imageFile = formData.get('file') as File;
+  const token = formData.get('token') as string;
+
+  if (!productData) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Product data is missing' }),
+      { status: 400 }
+    );
+  }
+
   if (!imageFile) {
     return new Response(
-      JSON.stringify({ success: false, error: 'Image file is missing' }),
+      JSON.stringify({ success: false, error: 'Image file is required' }),
       { status: 400 }
     );
   }
@@ -35,9 +46,31 @@ export async function POST(req: Request) {
   });
 
   try {
+    // Generate a unique filename using timestamp and original name
+    const timestamp = Date.now();
+    const uniqueFilename = `${timestamp}-${imageFile.name}`;
+
+    // Add the picture_url to productData before creating the product
+    const productDataWithUrl = {
+      name: productData.name,
+      price_in_euro: productData.price_in_euro,
+      quantity: productData.quantity,
+      picture_url: `${process.env.CLOUDFLARE_R2_ENDPOINT}/${uniqueFilename}`,
+      description: productData.description, // Only include if it exists
+    };
+
+    // Remove empty strings from optional fields
+    const cleanProductData = Object.fromEntries(
+      Object.entries(productDataWithUrl).filter(
+        ([, value]) => value !== undefined
+      )
+    );
+
+    console.log('Sending to API:', cleanProductData);
+
     const createResponse = await axios.post(
       'https://api.firmsnap.com/shop/product',
-      productData,
+      cleanProductData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -48,18 +81,18 @@ export async function POST(req: Request) {
     const productId = createResponse.data.id;
 
     try {
+      // Convert File to Buffer for S3 upload
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       const uploadParams = {
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
-        Key: `${productId}/${imageFile.name}`,
-        Body: imageFile,
+        Key: uniqueFilename, // Use the same unique filename
+        Body: buffer,
         ContentType: imageFile.type,
       };
 
       await s3Client.send(new PutObjectCommand(uploadParams));
-
-      return new Response(JSON.stringify({ success: true, productId }), {
-        status: 200,
-      });
     } catch (uploadError) {
       await axios.delete(`https://api.firmsnap.com/shop/product/${productId}`, {
         headers: {
@@ -74,6 +107,10 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    return new Response(JSON.stringify({ success: true, productId }), {
+      status: 200,
+    });
   } catch (createError: unknown) {
     const errorMessage =
       createError instanceof Error
