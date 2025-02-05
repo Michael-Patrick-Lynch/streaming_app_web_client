@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/NewNavbar';
 import { UserProvider } from '@/context/UserContext';
 import RecommendedChannels from '@/components/RecommendedChannels';
 
@@ -32,11 +32,11 @@ export default function RootLayout({
       >
         <UserProvider>
           <div className="flex min-h-screen">
-            <div className="fixed top-0 left-0 w-full h-16 z-50 bg-gray-900">
+            <div className="fixed top-0 left-0 w-full h-16 z-50 bg-white">
               <Navbar />
             </div>
 
-            <div className="hidden lg:block fixed top-16 left-0 w-64 h-full z-40 bg-gray-900">
+            <div className="hidden lg:block fixed top-16 left-0 w-64 h-full z-40 bg-white">
               <RecommendedChannels />
             </div>
 
