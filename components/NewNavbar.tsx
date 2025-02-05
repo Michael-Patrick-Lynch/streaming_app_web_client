@@ -1,5 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef, JSX } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Book, Menu, Sunset, Zap } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
@@ -125,10 +127,16 @@ const Navbar = ({
       <div className="max-w-9xl mx-auto px-4">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
-            <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="w-8" alt={logo.alt} />
+            <Link href={logo.url} className="flex items-center gap-2">
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={32}
+                height={32}
+                className="w-8"
+              />
               <span className="text-lg font-semibold">{logo.title}</span>
-            </a>
+            </Link>
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -144,24 +152,24 @@ const Navbar = ({
               <>
                 {currentUser.is_seller ? (
                   <Button asChild size="sm">
-                    <a href="/manage-shop">Manage Shop</a>
+                    <Link href="/manage-shop">Manage Shop</Link>
                   </Button>
                 ) : (
                   <Button asChild variant="outline" size="sm">
-                    <a href="/become-seller">Become Seller</a>
+                    <Link href="/become-seller">Become Seller</Link>
                   </Button>
                 )}
                 <Button asChild size="sm">
-                  <a href="/manage-buyer">Buyer Hub</a>
+                  <Link href="/manage-buyer">Buyer Hub</Link>
                 </Button>
               </>
             ) : (
               <>
                 <Button asChild variant="outline" size="sm">
-                  <a href="/login">Log In</a>
+                  <Link href="/login">Log In</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <a href="/signup">Sign Up</a>
+                  <Link href="/signup">Sign Up</Link>
                 </Button>
               </>
             )}
@@ -169,10 +177,16 @@ const Navbar = ({
         </nav>
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="w-8" alt={logo.alt} />
+            <Link href={logo.url} className="flex items-center gap-2">
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={32}
+                height={32}
+                className="w-8"
+              />
               <span className="text-lg font-semibold">{logo.title}</span>
-            </a>
+            </Link>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -182,12 +196,18 @@ const Navbar = ({
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="w-8" alt={logo.alt} />
+                    <Link href={logo.url} className="flex items-center gap-2">
+                      <Image
+                        src={logo.src}
+                        alt={logo.alt}
+                        width={32}
+                        height={32}
+                        className="w-8"
+                      />
                       <span className="text-lg font-semibold">
                         {logo.title}
                       </span>
-                    </a>
+                    </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="my-6 flex flex-col gap-6">
@@ -202,13 +222,13 @@ const Navbar = ({
                     <div className="border-t py-4">
                       <div className="grid grid-cols-2 justify-start">
                         {mobileExtraLinks.map((link, idx) => (
-                          <a
+                          <Link
                             key={idx}
-                            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
                             href={link.url}
+                            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
                           >
                             {link.name}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -218,24 +238,24 @@ const Navbar = ({
                       <>
                         {currentUser.is_seller ? (
                           <Button asChild size="sm">
-                            <a href="/manage-shop">Manage Shop</a>
+                            <Link href="/manage-shop">Manage Shop</Link>
                           </Button>
                         ) : (
                           <Button asChild variant="outline" size="sm">
-                            <a href="/become-seller">Become Seller</a>
+                            <Link href="/become-seller">Become Seller</Link>
                           </Button>
                         )}
                         <Button asChild size="sm">
-                          <a href="/manage-buyer">Buyer Hub</a>
+                          <Link href="/manage-buyer">Buyer Hub</Link>
                         </Button>
                       </>
                     ) : (
                       <>
                         <Button asChild variant="outline">
-                          <a href="/login">Log In</a>
+                          <Link href="/login">Log In</Link>
                         </Button>
                         <Button asChild>
-                          <a href="/signup">Sign Up</a>
+                          <Link href="/signup">Sign Up</Link>
                         </Button>
                       </>
                     )}
@@ -279,9 +299,9 @@ const renderMenuItem = (
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
-                  <a
-                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted hover:text-accent-foreground"
+                  <Link
                     href={subItem.url}
+                    className="flex select-none gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted hover:text-accent-foreground"
                   >
                     {subItem.icon}
                     <div>
@@ -294,7 +314,7 @@ const renderMenuItem = (
                         </p>
                       )}
                     </div>
-                  </a>
+                  </Link>
                 </NavigationMenuLink>
               </li>
             ))}
@@ -305,13 +325,13 @@ const renderMenuItem = (
   }
 
   return (
-    <a
+    <Link
       key={item.title}
-      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
       href={item.url}
+      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
     >
       {item.title}
-    </a>
+    </Link>
   );
 };
 
@@ -324,10 +344,10 @@ const renderMobileMenuItem = (item: MenuItem) => {
         </AccordionTrigger>
         <AccordionContent className="mt-2">
           {item.items.map((subItem) => (
-            <a
+            <Link
               key={subItem.title}
-              className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-muted hover:text-accent-foreground"
               href={subItem.url}
+              className="flex select-none gap-4 rounded-md p-3 leading-none outline-none transition-colors hover:bg-muted hover:text-accent-foreground"
             >
               {subItem.icon}
               <div>
@@ -338,7 +358,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
                   </p>
                 )}
               </div>
-            </a>
+            </Link>
           ))}
         </AccordionContent>
       </AccordionItem>
@@ -346,9 +366,9 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <a key={item.title} href={item.url} className="font-semibold">
+    <Link key={item.title} href={item.url} className="font-semibold">
       {item.title}
-    </a>
+    </Link>
   );
 };
 
