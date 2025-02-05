@@ -38,10 +38,15 @@ export default function ManageShopPage() {
     }
   };
 
-  const handleUpdate = async (productId: number, updatedFields: Partial<Product>) => {
+  const handleUpdate = async (
+    productId: number,
+    updatedFields: Partial<Product>
+  ) => {
     try {
       const token = localStorage.getItem('authToken');
-      const existingProduct = products.find(product => product.id === productId);
+      const existingProduct = products.find(
+        (product) => product.id === productId
+      );
       if (!existingProduct) {
         throw new Error('Product not found');
       }
@@ -54,14 +59,20 @@ export default function ManageShopPage() {
         picture_url: updatedProduct.picture_url,
         description: updatedProduct.description,
       };
-      await axios.put(`https://api.firmsnap.com/shop/product/${productId}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setProducts(products.map((product) => 
-        product.id === productId ? updatedProduct : product
-      ));
+      await axios.put(
+        `https://api.firmsnap.com/shop/product/${productId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setProducts(
+        products.map((product) =>
+          product.id === productId ? updatedProduct : product
+        )
+      );
       setEditingProduct(null);
     } catch (err) {
       console.error('Failed to update product:', err);
@@ -171,7 +182,7 @@ export default function ManageShopPage() {
                 const formData = new FormData(e.target as HTMLFormElement);
                 const updatedFields: Partial<Product> = {
                   name: formData.get('name') as string,
-                  price: parseFloat(formData.get('price') as string),
+                  price: parseFloat(formData.get('price') as string) * 100,
                   quantity: parseInt(formData.get('quantity') as string, 10),
                   picture_url: formData.get('picture_url') as string,
                   description: formData.get('description') as string,
@@ -192,12 +203,14 @@ export default function ManageShopPage() {
               </div>
               <div className="mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Price
+                  Price (EUR)
                 </label>
                 <input
-                  type="number"
+                  type="float"
                   name="price"
-                  defaultValue={editingProduct.price}
+                  defaultValue={editingProduct.price
+                    .toString()
+                    .replace('€', '')}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                 />
               </div>
