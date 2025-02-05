@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef, JSX } from 'react';
-import { Book, Menu, Sunset, Trees, Zap } from 'lucide-react';
+import { Book, Menu, Sunset, Zap } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 import {
   Accordion,
@@ -45,109 +46,47 @@ interface NavbarProps {
     name: string;
     url: string;
   }[];
-  auth?: {
-    login: {
-      text: string;
-      url: string;
-    };
-    signup: {
-      text: string;
-      url: string;
-    };
-  };
 }
 
 const Navbar = ({
   logo = {
-    url: 'https://www.shadcnblocks.com',
+    url: '/',
     src: 'https://www.shadcnblocks.com/images/block/block-1.svg',
     alt: 'logo',
     title: 'Firmsnap',
   },
   menu = [
-    { title: 'Home', url: '#' },
-    {
-      title: 'Products',
-      url: '#',
-      items: [
-        {
-          title: 'Blog',
-          description: 'The latest industry news, updates, and info',
-          icon: <Book className="size-5 shrink-0" />,
-          url: '#',
-        },
-        {
-          title: 'Company',
-          description: 'Our mission is to innovate and empower the world',
-          icon: <Trees className="size-5 shrink-0" />,
-          url: '#',
-        },
-        {
-          title: 'Careers',
-          description: 'Browse job listing and discover our workspace',
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: '#',
-        },
-        {
-          title: 'Support',
-          description:
-            'Get in touch with our support team or visit our community forums',
-          icon: <Zap className="size-5 shrink-0" />,
-          url: '#',
-        },
-      ],
-    },
+    { title: 'About', url: '/about' },
     {
       title: 'Resources',
-      url: '#',
+      url: '/resources',
       items: [
         {
-          title: 'Help Center',
-          description: 'Get all the answers you need right here',
-          icon: <Zap className="size-5 shrink-0" />,
-          url: '#',
-        },
-        {
-          title: 'Contact Us',
-          description: 'We are here to help you with any questions you have',
+          title: 'Contact',
+          description: 'Get in touch with us',
           icon: <Sunset className="size-5 shrink-0" />,
-          url: '#',
+          url: '/contact',
         },
         {
-          title: 'Status',
-          description: 'Check the current status of our services and APIs',
-          icon: <Trees className="size-5 shrink-0" />,
-          url: '#',
+          title: 'Help Center',
+          description: 'Find answers to common questions',
+          icon: <Zap className="size-5 shrink-0" />,
+          url: '/help',
         },
         {
           title: 'Terms of Service',
-          description: 'Our terms and conditions for using our services',
+          description: 'Read our terms and conditions',
           icon: <Book className="size-5 shrink-0" />,
-          url: '#',
+          url: '/terms',
         },
       ],
     },
-    {
-      title: 'Pricing',
-      url: '#',
-    },
-    {
-      title: 'Blog',
-      url: '#',
-    },
   ],
-  mobileExtraLinks = [
-    { name: 'Press', url: '#' },
-    { name: 'Contact', url: '#' },
-    { name: 'Imprint', url: '#' },
-    { name: 'Sitemap', url: '#' },
-  ],
-  auth = {
-    login: { text: 'Log in', url: '#' },
-    signup: { text: 'Sign up', url: '#' },
-  },
+  mobileExtraLinks = [],
 }: NavbarProps) => {
+  const { currentUser } = useUser();
   // State and ref to manage disabling click when the menu is opened via hover
+  // https://github.com/shadcn-ui/ui/issues/76
   const [disable, setDisable] = useState(false);
   const triggerRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -201,12 +140,31 @@ const Navbar = ({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.text}</a>
-            </Button>
-            <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.text}</a>
-            </Button>
+            {currentUser ? (
+              <>
+                {currentUser.is_seller ? (
+                  <Button asChild size="sm">
+                    <a href="/manage-shop">Manage Shop</a>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" size="sm">
+                    <a href="/become-seller">Become Seller</a>
+                  </Button>
+                )}
+                <Button asChild size="sm">
+                  <a href="/manage-buyer">Buyer Hub</a>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <a href="/login">Log In</a>
+                </Button>
+                <Button asChild size="sm">
+                  <a href="/signup">Sign Up</a>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
         <div className="block lg:hidden">
@@ -240,26 +198,47 @@ const Navbar = ({
                   >
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
-                  <div className="border-t py-4">
-                    <div className="grid grid-cols-2 justify-start">
-                      {mobileExtraLinks.map((link, idx) => (
-                        <a
-                          key={idx}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
-                          href={link.url}
-                        >
-                          {link.name}
-                        </a>
-                      ))}
+                  {mobileExtraLinks.length > 0 && (
+                    <div className="border-t py-4">
+                      <div className="grid grid-cols-2 justify-start">
+                        {mobileExtraLinks.map((link, idx) => (
+                          <a
+                            key={idx}
+                            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
+                            href={link.url}
+                          >
+                            {link.name}
+                          </a>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.text}</a>
-                    </Button>
-                    <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.text}</a>
-                    </Button>
+                    {currentUser ? (
+                      <>
+                        {currentUser.is_seller ? (
+                          <Button asChild size="sm">
+                            <a href="/manage-shop">Manage Shop</a>
+                          </Button>
+                        ) : (
+                          <Button asChild variant="outline" size="sm">
+                            <a href="/become-seller">Become Seller</a>
+                          </Button>
+                        )}
+                        <Button asChild size="sm">
+                          <a href="/manage-buyer">Buyer Hub</a>
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline">
+                          <a href="/login">Log In</a>
+                        </Button>
+                        <Button asChild>
+                          <a href="/signup">Sign Up</a>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </SheetContent>
