@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/NewNavbar';
 import { UserProvider } from '@/context/UserContext';
-import RecommendedChannels from '@/components/RecommendedChannels';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,11 +35,7 @@ export default function RootLayout({
               <Navbar />
             </div>
 
-            <div className="hidden lg:block fixed top-16 left-0 w-64 h-full z-40 bg-white">
-              <RecommendedChannels />
-            </div>
-
-            <div className="lg:ml-64 flex-1">
+            <div className="flex-1">
               <div className="mt-16">{children}</div>
             </div>
           </div>
