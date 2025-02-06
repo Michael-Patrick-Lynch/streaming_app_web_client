@@ -27,6 +27,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 
 interface MenuItem {
   title: string;
@@ -266,6 +267,7 @@ const Navbar = ({
           </div>
         </div>
       </div>
+      <Separator className="my-2" />
     </section>
   );
 };
