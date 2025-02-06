@@ -31,7 +31,7 @@ export type Listing = {
   image: string;
   category: string;
   quantity: number;
-  price: number;
+  price_with_currency: [number, string];
   listingType: string;
 };
 
@@ -70,13 +70,17 @@ export const columns: ColumnDef<Listing>[] = [
     ),
   },
   {
-    accessorKey: 'price',
+    accessorKey: 'price_with_currency',
     header: 'Price & Format',
     cell: ({ row }) => {
-      const price = parseFloat(row.getValue('price'));
+      const [price, currency] = row.getValue('price_with_currency') as [
+        number,
+        string,
+      ];
+
       const formattedPrice = new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: currency,
       }).format(price);
       return (
         <div className="text-left">
@@ -127,11 +131,12 @@ export function SellerInventoryTable() {
           id: l.id,
           name: l.title,
           image:
-            l.image ||
+            l.picture_url ||
             'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737945906891-cat.gif',
-          category: l.category || 'N/A',
+          category:
+            l.category == 'trading_card_games' ? 'Trading Card Games' : 'N/A',
           quantity: l.quantity,
-          price: l.price.amount / 100,
+          price_with_currency: [l.price.amount / 100, l.price.currency],
           listingType:
             l.type === 'bin'
               ? 'Buy-It-Now'
