@@ -25,7 +25,6 @@ import {
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-// Define the Listing type
 export type Listing = {
   id: string;
   name: string;
@@ -36,51 +35,6 @@ export type Listing = {
   listingType: string;
 };
 
-// Create some mock data for your listings
-const data: Listing[] = [
-  {
-    id: 'listing1',
-    name: 'Cool Sneakers',
-    image:
-      'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737944807187-LTE_frame%20100%20SNR.png',
-    category: 'Shoes',
-    quantity: 15,
-    price: 79.99,
-    listingType: 'Buy-It-Now',
-  },
-  {
-    id: 'listing2',
-    name: 'Stylish Jacket',
-    image:
-      'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737944807187-LTE_frame%20100%20SNR.png',
-    category: 'Apparel',
-    quantity: 5,
-    price: 149.99,
-    listingType: 'Auction',
-  },
-  {
-    id: 'listing3',
-    name: 'Modern Watch',
-    image:
-      'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737944807187-LTE_frame%20100%20SNR.png',
-    category: 'Accessories',
-    quantity: 20,
-    price: 199.99,
-    listingType: 'Buy-It-Now',
-  },
-  {
-    id: 'listing4',
-    name: 'Elegant Handbag',
-    image:
-      'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737944807187-LTE_frame%20100%20SNR.png',
-    category: 'Bags',
-    quantity: 8,
-    price: 249.99,
-    listingType: 'Buy-It-Now',
-  },
-];
-
-// Update the columns definition
 export const columns: ColumnDef<Listing>[] = [
   {
     accessorKey: 'name',
@@ -96,7 +50,6 @@ export const columns: ColumnDef<Listing>[] = [
             height={40}
             className="rounded-md object-cover"
           />
-
           <span>{listing.name}</span>
         </div>
       );
@@ -134,6 +87,7 @@ export const columns: ColumnDef<Listing>[] = [
 ];
 
 export function SellerInventoryTable() {
+  const [data, setData] = React.useState<Listing[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -143,6 +97,51 @@ export function SellerInventoryTable() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const router = useRouter();
+
+  React.useEffect(() => {
+    async function fetchListings() {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('https://api.firmsnap.com/listings', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          console.error('Failed to fetch listings');
+          return;
+        }
+        const json = await response.json();
+
+        const combined = [
+          ...(json.buy_it_now || []),
+          ...(json.auctions || []),
+          ...(json.giveaways || []),
+        ];
+
+        const listings: Listing[] = combined.map((l) => ({
+          id: l.id,
+          name: l.title,
+          image:
+            l.image ||
+            'https://pub-b0d5f024ddc742a2993ac9ca697c41f7.r2.dev/1737945906891-cat.gif',
+          category: l.category || 'N/A',
+          quantity: l.quantity,
+          price: l.price.amount / 100,
+          listingType:
+            l.type === 'bin'
+              ? 'Buy-It-Now'
+              : l.type === 'auction'
+                ? 'Auction'
+                : l.type,
+        }));
+        setData(listings);
+      } catch (error) {
+        console.error('Error fetching listings:', error);
+      }
+    }
+    fetchListings();
+  }, []);
 
   const table = useReactTable({
     data,
@@ -209,7 +208,7 @@ export function SellerInventoryTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No Listings
                 </TableCell>
               </TableRow>
             )}
