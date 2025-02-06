@@ -13,6 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { SellerInventoryTable } from '@/components/SellerInventoryTable';
 
 interface Product {
   id: number;
@@ -283,6 +284,7 @@ export default function ManageShopPage() {
             </div>
           )}
         </div>
+        <SellerInventoryTable />
       </SidebarInset>
     </SidebarProvider>
   );
