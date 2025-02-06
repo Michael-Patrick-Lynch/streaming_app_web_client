@@ -14,6 +14,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { SellerInventoryTable } from '@/components/SellerInventoryTable';
+import { Button } from '@/components/ui/button';
 
 interface Product {
   id: number;
@@ -117,6 +118,10 @@ export default function ManageShopPage() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="mb-8 text-center">
+            <div className="flex justify-end pb-4 lg:pr-10">
+              <Button className="rounded-full">Create Listing</Button>
+            </div>
+            <SellerInventoryTable />
             <p className="text-gray-600">Add, remove or edit your products</p>
             <Link href="/add-product" className="hover:underline">
               Add Product
@@ -284,7 +289,6 @@ export default function ManageShopPage() {
             </div>
           )}
         </div>
-        <SellerInventoryTable />
       </SidebarInset>
     </SidebarProvider>
   );

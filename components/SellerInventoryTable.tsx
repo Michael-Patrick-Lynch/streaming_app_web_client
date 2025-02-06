@@ -58,12 +58,16 @@ export const columns: ColumnDef<Listing>[] = [
   {
     accessorKey: 'category',
     header: 'Category',
-    cell: ({ row }) => <div>{row.getValue('category')}</div>,
+    cell: ({ row }) => (
+      <div className="text-left">{row.getValue('category')}</div>
+    ),
   },
   {
     accessorKey: 'quantity',
     header: 'Quantity',
-    cell: ({ row }) => <div>{row.getValue('quantity')}</div>,
+    cell: ({ row }) => (
+      <div className="text-left">{row.getValue('quantity')}</div>
+    ),
   },
   {
     accessorKey: 'price',
@@ -217,7 +221,7 @@ export function SellerInventoryTable() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} row(s)
+          {table.getFilteredRowModel().rows.length} Listing(s)
         </div>
         <div className="space-x-2">
           <Button
