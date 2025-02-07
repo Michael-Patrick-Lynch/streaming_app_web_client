@@ -7,13 +7,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { SellerInventoryTable } from '@/components/SellerInventoryTable';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 
-export default function ManageShopPage() {
-  const router = useRouter();
-
+export default function CreateListingPage() {
   return (
     <SidebarProvider>
       <SellerHubSidebar />
@@ -23,21 +19,19 @@ export default function ManageShopPage() {
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <h1 className="text-3xl font-bold">Inventory</h1>
-            </div>
-            <div className="pb-4 lg:pr-10">
-              <Button
-                onClick={() => router.push('/create-listing')}
-                className="bg-green-300 text-black font-bold rounded-full lg:text-lg lg:px-6 lg:py-6"
-              >
-                Create Listing
-              </Button>
+              <h1 className="text-4xl font-semibold">Create a listing</h1>
             </div>
           </header>
         </div>
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="mb-8 text-center lg:pt-20">
-            <SellerInventoryTable />
+            <p>This is where my form to create a product will go</p>
+          </div>
+
+          <div className="pb-4 lg:pr-10">
+            <Button className="bg-green-300 text-black font-bold rounded-full lg:text-lg lg:px-6 lg:py-6">
+              Submit
+            </Button>
           </div>
         </div>
       </SidebarInset>
