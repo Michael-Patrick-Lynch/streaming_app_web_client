@@ -7,7 +7,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import CreateListingForm from '@/components/CreateListingForm';
 
 export default function CreateListingPage() {
@@ -27,12 +26,6 @@ export default function CreateListingPage() {
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="mb-8 text-center lg:pt-20">
             <CreateListingForm />
-          </div>
-
-          <div className="pb-4 lg:pr-10">
-            <Button className="bg-green-300 text-black font-bold rounded-full lg:text-lg lg:px-6 lg:py-6">
-              Submit
-            </Button>
           </div>
         </div>
       </SidebarInset>

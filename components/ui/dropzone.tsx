@@ -1,33 +1,27 @@
-// Taken from https://github.com/shadcn-ui/ui/issues/163 user: arafays
 import React, { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
-// Define the props expected by the Dropzone component
 interface DropzoneProps {
-  onChange: React.Dispatch<React.SetStateAction<string[]>>;
+  onChange: (files: File[]) => void;
   className?: string;
   fileExtensions?: string[];
 }
 
-// Create the Dropzone component receiving props
 export function Dropzone({
   onChange,
   className,
   fileExtensions,
   ...props
 }: DropzoneProps) {
-  // Initialize state variables using the useState hook
-  const fileInputRef = useRef<HTMLInputElement | null>(null); // Reference to file input element
-  const [fileInfo, setFileInfo] = useState<string | null>(null); // Information about the uploaded file
-  const [error, setError] = useState<string | null>(null); // Error message state
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [fileInfo, setFileInfo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to handle drag over event
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  // Function to handle drop event
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -35,7 +29,6 @@ export function Dropzone({
     handleFiles(files);
   };
 
-  // Function to handle file input change event
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files) {
@@ -43,11 +36,9 @@ export function Dropzone({
     }
   };
 
-  // Function to handle processing of uploaded files
   const handleFiles = (files: FileList) => {
     const uploadedFile = files[0];
 
-    // Check if at least one allowed extension is present in the filename
     if (
       fileExtensions &&
       !fileExtensions.some((ext) =>
@@ -60,21 +51,17 @@ export function Dropzone({
       return;
     }
 
-    const fileSizeInKB = Math.round(uploadedFile.size / 1024); // Convert to KB
+    const fileSizeInKB = Math.round(uploadedFile.size / 1024);
+    const fileArray = Array.from(files);
 
-    const fileList = Array.from(files).map((file) => URL.createObjectURL(file));
-    onChange((prevFiles) => [...prevFiles, ...fileList]);
+    onChange(fileArray);
 
-    // Display file information
     setFileInfo(`Uploaded file: ${uploadedFile.name} (${fileSizeInKB} KB)`);
-    setError(null); // Reset error state
+    setError(null);
   };
 
-  // Function to simulate a click on the file input element
   const handleButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    fileInputRef.current?.click();
   };
 
   return (
@@ -97,7 +84,7 @@ export function Dropzone({
               fileExtensions
                 ? fileExtensions.map((ext) => '.' + ext).join(',')
                 : undefined
-            } // Set accepted file type
+            }
             onChange={handleFileInputChange}
             className="hidden"
             multiple
