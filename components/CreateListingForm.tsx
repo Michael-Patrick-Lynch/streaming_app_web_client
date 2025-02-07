@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -16,12 +17,29 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
+interface ListingData {
+  title: string;
+  description: string;
+  type: 'auction' | 'bin';
+  quantity: number;
+  category: string;
+  shipping_domestic_price: number;
+  shipping_eu_price: number;
+  auction_starting_bid?: number;
+  auction_duration?: number;
+  auction_sudden_death?: boolean;
+  bin_price?: number;
+  bin_accept_offers?: boolean;
+  show_id?: string;
+  reserve_for_live?: boolean;
+}
+
 export default function CreateListingForm() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [quantity, setQuantity] = useState('1');
-  const [category, setCategory] = useState('art'); // default category
+  const [category, setCategory] = useState('trading_card_games');
   const [shippingDomestic, setShippingDomestic] = useState('');
   const [shippingEU, setShippingEU] = useState('');
 
@@ -60,7 +78,7 @@ export default function CreateListingForm() {
       return;
     }
 
-    const listingData: any = {
+    const listingData: ListingData = {
       title,
       description,
       type: isAuction ? 'auction' : 'bin',
