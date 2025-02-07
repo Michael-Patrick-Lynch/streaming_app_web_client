@@ -8,6 +8,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import CreateListingForm from '@/components/CreateListingForm';
 
 export default function CreateListingPage() {
   return (
@@ -25,7 +26,7 @@ export default function CreateListingPage() {
         </div>
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="mb-8 text-center lg:pt-20">
-            <p>This is where my form to create a product will go</p>
+            <CreateListingForm />
           </div>
 
           <div className="pb-4 lg:pr-10">
