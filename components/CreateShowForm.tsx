@@ -18,14 +18,14 @@ import axios from 'axios';
 interface ShowData {
   title: string;
   category: string;
-  datetime: string;
+  scheduled_time: string;
 }
 
 export default function CreateShowForm() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('music');
-  const [datetime, setDatetime] = useState('');
+  const [scheduled_time, setScheduledTime] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
   // Handler for Dropzone file changes:
@@ -47,7 +47,7 @@ export default function CreateShowForm() {
     const showData: ShowData = {
       title,
       category,
-      datetime,
+      scheduled_time,
     };
 
     const token = localStorage.getItem('authToken');
@@ -111,8 +111,8 @@ export default function CreateShowForm() {
                   <Input
                     type="datetime-local"
                     placeholder="Select date and time"
-                    value={datetime}
-                    onChange={(e) => setDatetime(e.target.value)}
+                    value={scheduled_time}
+                    onChange={(e) => setScheduledTime(e.target.value)}
                   />
                 </div>
               </div>
