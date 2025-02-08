@@ -7,25 +7,27 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import CreateListingForm from '@/components/CreateListingForm';
+import CreateShowForm from '@/components/CreateShowForm';
 
-export default function CreateListingPage() {
+export default function CreateShowPage() {
   return (
     <SidebarProvider>
       <SellerHubSidebar />
       <SidebarInset>
         <div className="pt-10">
-          <header className="flex h-16 shrink-0 items-center justify-between border-b px-4">
+          <header className="flex h-16 shrink-0 items-center justify-between border-b px-4 pb-8">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <h1 className="text-4xl font-semibold">Create a listing</h1>
+              <h1 className="text-4xl font-semibold">
+                Schedule your livestream show
+              </h1>
             </div>
           </header>
         </div>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="mb-8 text-left lg:pt-20">
-            <CreateListingForm />
+          <div className="mb-8 text-left max-w-6xl lg:pt-10 lg:pr-80 lg:pl-40">
+            <CreateShowForm />
           </div>
         </div>
       </SidebarInset>

@@ -36,7 +36,7 @@ export default function ManageShopPage() {
           </header>
         </div>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="mb-8 text-center lg:pt-20">
+          <div className="mb-8 text-left lg:pt-20">
             <SellerInventoryTable />
           </div>
         </div>
