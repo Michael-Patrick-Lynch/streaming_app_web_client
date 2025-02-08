@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -11,6 +10,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 interface Show {
   id: number;
@@ -21,7 +21,7 @@ interface Show {
   scheduled_time: string;
 }
 
-export default function SellerShowDisplay() {
+export default function ShowsDashboard() {
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
@@ -60,10 +60,9 @@ export default function SellerShowDisplay() {
     fetchShows();
   }, []);
 
-  // Group shows by status (live, scheduled, ended, cancelled)
   const groupedShows = shows.reduce<Record<string, Show[]>>((acc, show) => {
-    // Ensure the status is in lowercase for consistency
-    const key = show.status.toLowerCase();
+    let key = show.status.toLowerCase();
+    if (key === 'scheduled') key = 'upcoming';
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -71,11 +70,14 @@ export default function SellerShowDisplay() {
     return acc;
   }, {});
 
-  // Copy show link to clipboard
+  const handleOpenShow = (showId: number) => {
+    router.push(`/show/${showId}`);
+  };
+
   const handleCopyLink = async (showId: number) => {
     try {
       await navigator.clipboard.writeText(
-        `https://firmsnap.com/show-${showId}`
+        `https://firmsnap.com/show/${showId}`
       );
       alert('Show link copied to clipboard!');
     } catch (error) {
@@ -83,36 +85,31 @@ export default function SellerShowDisplay() {
     }
   };
 
-  // Navigate to the edit show page using the App Router
   const handleEditShow = (showId: number) => {
     router.push(`/edit-show/${showId}`);
   };
 
-  // Call the cancel endpoint and update the show status in the UI
   const handleCancelShow = async (showId: number) => {
     const token = localStorage.getItem('authToken');
     try {
-      const res = await fetch(
-        `https://api.firmsnap.com/shows/cancel/${showId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`https://api.firmsnap.com/shows/${showId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ show: { status: 'cancelled' } }),
+      });
 
       if (!res.ok) {
         console.error('Failed to cancel show');
         return;
       }
 
-      // Update the UI: set the cancelled show's status to "cancelled"
+      // Update the show in state with the returned updated show object
+      const updatedShow = await res.json();
       setShows((prevShows) =>
-        prevShows.map((show) =>
-          show.id === showId ? { ...show, status: 'cancelled' } : show
-        )
+        prevShows.map((show) => (show.id === showId ? updatedShow : show))
       );
     } catch (error) {
       console.error('Error cancelling show:', error);
@@ -127,66 +124,76 @@ export default function SellerShowDisplay() {
     );
   }
 
-  const statusOrder = ['live', 'scheduled', 'ended', 'cancelled'];
+  const statusOrder = ['live', 'upcoming', 'ended', 'cancelled'];
 
   return (
     <div className="container mx-auto px-4 py-8">
       {statusOrder.map((status) => {
         const showsByStatus = groupedShows[status] || [];
-        if (showsByStatus.length === 0) return null;
         return (
           <section key={status} className="mb-8">
             <h2 className="text-2xl font-bold mb-4 capitalize">
               {status} shows
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {showsByStatus.map((show) => (
-                <Card key={show.id} className="shadow">
-                  <CardHeader>
-                    <CardTitle>{show.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {show.thumbnail_url && (
-                      <img
-                        src={show.thumbnail_url}
-                        alt={show.title}
-                        className="w-full h-40 object-cover rounded mb-2"
-                      />
-                    )}
-                    <p>
-                      <strong>Scheduled Time:</strong>{' '}
-                      {new Date(show.scheduled_time).toLocaleString()}
-                    </p>
-                    <p>
-                      <strong>Category:</strong> {show.category}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex flex-wrap gap-2">
-                    <Link href={`/show-${show.id}`}>
-                      <Button variant="outline">Open Show</Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleCopyLink(show.id)}
-                    >
-                      Copy Show Link
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEditShow(show.id)}
-                    >
-                      Edit Show
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleCancelShow(show.id)}
-                    >
-                      Cancel Show
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+            {showsByStatus.length === 0 ? (
+              <p>You currently have no {status} shows.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {showsByStatus.map((show) => (
+                  <Card key={show.id} className="shadow">
+                    <CardHeader>
+                      <CardTitle>{show.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {show.thumbnail_url && (
+                        <div className="relative w-full h-48 mb-3">
+                          <Image
+                            src={show.thumbnail_url}
+                            alt={show.title}
+                            fill
+                            className="w-full h-40 object-cover rounded mb-2"
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      <p>
+                        <strong>Scheduled Time:</strong>{' '}
+                        {new Date(show.scheduled_time).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>Category:</strong> {show.category}
+                      </p>
+                    </CardContent>
+                    <CardFooter className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleOpenShow(show.id)}
+                      >
+                        Open Show
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleCopyLink(show.id)}
+                      >
+                        Copy Show Link
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleEditShow(show.id)}
+                      >
+                        Edit Show
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleCancelShow(show.id)}
+                      >
+                        Cancel Show
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
           </section>
         );
       })}
