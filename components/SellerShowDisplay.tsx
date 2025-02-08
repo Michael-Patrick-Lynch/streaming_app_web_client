@@ -139,59 +139,69 @@ export default function ShowsDashboard() {
               <p>You currently have no {status} shows.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {showsByStatus.map((show) => (
-                  <Card key={show.id} className="shadow">
-                    <CardHeader>
-                      <CardTitle>{show.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {show.thumbnail_url && (
-                        <div className="relative w-full h-48 mb-3">
-                          <Image
-                            src={show.thumbnail_url}
-                            alt={show.title}
-                            fill
-                            className="w-full h-40 object-cover rounded mb-2"
-                            unoptimized
-                          />
-                        </div>
-                      )}
-                      <p>
-                        <strong>Scheduled Time:</strong>{' '}
-                        {new Date(show.scheduled_time).toLocaleString()}
-                      </p>
-                      <p>
-                        <strong>Category:</strong> {show.category}
-                      </p>
-                    </CardContent>
-                    <CardFooter className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleOpenShow(show.id)}
-                      >
-                        Open Show
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleCopyLink(show.id)}
-                      >
-                        Copy Show Link
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleEditShow(show.id)}
-                      >
-                        Edit Show
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleCancelShow(show.id)}
-                      >
-                        Cancel Show
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                {showsByStatus.map((show) => {
+                  const statusLower = show.status.toLowerCase();
+                  const isEndedOrCancelled =
+                    statusLower === 'ended' || statusLower === 'cancelled';
+                  const isLive = statusLower === 'live';
+                  return (
+                    <Card key={show.id} className="shadow">
+                      <CardHeader>
+                        <CardTitle>{show.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {show.thumbnail_url && (
+                          <div className="relative w-full h-48 mb-3">
+                            <Image
+                              src={show.thumbnail_url}
+                              alt={show.title}
+                              fill
+                              className="w-full h-40 object-cover rounded mb-2"
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                        <p>
+                          <strong>Scheduled Time:</strong>{' '}
+                          {new Date(show.scheduled_time).toLocaleString()}
+                        </p>
+                        <p>
+                          <strong>Category:</strong> {show.category}
+                        </p>
+                      </CardContent>
+                      <CardFooter className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleOpenShow(show.id)}
+                          disabled={isEndedOrCancelled}
+                        >
+                          Open Show
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleCopyLink(show.id)}
+                          disabled={isEndedOrCancelled}
+                        >
+                          Copy Show Link
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEditShow(show.id)}
+                          disabled={isEndedOrCancelled || isLive}
+                        >
+                          Edit Show
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleCancelShow(show.id)}
+                          disabled={isEndedOrCancelled || isLive}
+                        >
+                          Cancel Show
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </section>
