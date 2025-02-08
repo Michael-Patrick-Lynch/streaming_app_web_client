@@ -4,3 +4,11 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export function formatCategory(category: string) {
+  const catToFormattedCat: Record<string, string> = {
+    trading_card_games: 'Trading Card Games',
+  };
+
+  return catToFormattedCat[category] ?? category;
+}
