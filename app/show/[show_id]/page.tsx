@@ -7,7 +7,7 @@ export default function WatchShowPage() {
     <div style={{ height: 'calc(100vh - 64px)' }} className="overflow-hidden">
       <div className="flex flex-col lg:flex-row w-full h-full">
         {/* Shop (Desktop Only) */}
-        <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-gray-100 p-4">
+        <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-black p-4">
           <p>Shop</p>
         </div>
 
@@ -21,7 +21,7 @@ export default function WatchShowPage() {
         </div>
 
         {/* Livechat (Desktop Only) */}
-        <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-gray-100 p-4">
+        <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-black p-4">
           <p>Livechat</p>
         </div>
       </div>
