@@ -206,6 +206,15 @@ export default function LiveStream({
             Send
           </Button>
         </div>
+        {/* Item Info */}
+        <div className="text-white">
+          <h3 className="font-bold text-lg">{itemName}</h3>
+          <div className="flex gap-4 text-sm">
+            <span>🔥 {bidCount} bids</span>
+            <span>🚚 DE: €5.99</span>
+            <span>🌍 EU: €9.99</span>
+          </div>
+        </div>
 
         {/* Bid Controls */}
         <div className="flex gap-2 mb-4 mt-2">
@@ -218,16 +227,6 @@ export default function LiveStream({
           >
             Bid €{calculateNextBid(highestBid)}
           </Button>
-        </div>
-
-        {/* Item Info */}
-        <div className="text-white">
-          <h3 className="font-bold text-lg">{itemName}</h3>
-          <div className="flex gap-4 text-sm">
-            <span>🔥 {bidCount} bids</span>
-            <span>🚚 DE: €5.99</span>
-            <span>🌍 EU: €9.99</span>
-          </div>
         </div>
       </div>
     </div>
