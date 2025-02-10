@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import ReactPlayer from 'react-player';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
@@ -12,6 +12,8 @@ interface LiveStreamProps {
   streamerName: string;
   streamerImage: string;
 }
+
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 export default function LiveStream({
   streamUrl,
