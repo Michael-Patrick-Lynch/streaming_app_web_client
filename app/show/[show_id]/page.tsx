@@ -15,7 +15,7 @@ export default function WatchShowPage() {
         <div className="w-full h-full lg:w-1/3">
           <LiveStream
             streamUrl="https://api.firmsnap.com/hls/bullshit.m3u8"
-            streamerName="FashionShopLive"
+            streamerName="bullshit"
             streamerImage="/profile.jpg"
           />
         </div>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { Socket, Presence, Channel } from 'phoenix';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
@@ -24,7 +25,15 @@ export default function LiveStream({
   const [timeLeft] = useState('2:45');
   const [itemName] = useState('Vintage Designer Handbag');
   const [bidCount] = useState(12);
-  const [viewerCount] = useState(245);
+  const [viewerCount, setViewerCount] = useState(245);
+  const [chatMessages, setChatMessages] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [channel, setChannel] = useState<Channel | null>(null);
+
+  const userId = useMemo(
+    () => `anon_${Math.floor(Math.random() * 100000)}`,
+    []
+  );
 
   const calculateNextBid = (current: number) => {
     if (current < 15) return current + 1;
@@ -35,6 +44,51 @@ export default function LiveStream({
   const handleBid = () => {
     setHighestBid((prev) => calculateNextBid(prev));
   };
+
+  const handleSend = () => {
+    if (inputValue.trim() && channel) {
+      channel.push('new_msg', { body: inputValue });
+      setInputValue('');
+    }
+  };
+
+  useEffect(() => {
+    const socket = new Socket('wss://api.firmsnap.com/socket');
+    console.log('Connecting to live chat socket...');
+    socket.onOpen(() => console.log('Socket opened.'));
+    socket.onClose(() => console.log('Socket closed.'));
+    socket.onError((err) => console.error('Socket error:', err));
+    socket.connect();
+
+    const newChannel = socket.channel(`streamer:${streamerName}`, {
+      user_id: userId,
+    });
+    setChannel(newChannel);
+
+    newChannel
+      .join()
+      .receive('ok', (resp: Record<string, unknown>) =>
+        console.log('Joined channel successfully:', resp)
+      )
+      .receive('error', (resp: Record<string, unknown>) =>
+        console.error('Unable to join channel:', resp)
+      );
+
+    newChannel.on('new_msg', (payload: { body: string }) => {
+      setChatMessages((prev) => [...prev, payload.body]);
+    });
+
+    const presence = new Presence(newChannel);
+    presence.onSync(() => {
+      const presenceList = presence.list();
+      setViewerCount(Object.keys(presenceList).length);
+    });
+
+    return () => {
+      newChannel.leave();
+      socket.disconnect();
+    };
+  }, [streamerName, userId]);
 
   return (
     <div className="relative w-full h-full aspect-[9/16] bg-black">
@@ -124,20 +178,37 @@ export default function LiveStream({
         {/* Chat Section */}
         <Card className="mb-4 bg-transparent text-white border-white/20">
           <div className="p-2 h-[120px] overflow-y-auto">
-            {/* Chat Messages */}
             <div className="text-sm">
-              <p>
-                <span className="font-semibold">User1:</span> Love this item! 💖
-              </p>
-              <p>
-                <span className="font-semibold">Bidder22:</span> Going once!
-              </p>
+              {chatMessages.length > 0 ? (
+                chatMessages.map((msg, idx) => (
+                  <p key={idx}>
+                    <span className="font-semibold">Anon:</span> {msg}
+                  </p>
+                ))
+              ) : (
+                <p>No messages yet</p>
+              )}
             </div>
           </div>
         </Card>
+        <div className="mt-2 flex gap-2">
+          <input
+            type="text"
+            placeholder="Chat with the seller"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="flex-1 p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
+          />
+          <Button
+            onClick={handleSend}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Send
+          </Button>
+        </div>
 
         {/* Bid Controls */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 mt-2">
           <Button variant="outline" className="flex-1 text-white">
             Custom Bid
           </Button>
