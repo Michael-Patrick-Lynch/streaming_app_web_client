@@ -14,4 +14,3 @@ export default function Home() {
     </>
   );
 }
-// justify-items-center
