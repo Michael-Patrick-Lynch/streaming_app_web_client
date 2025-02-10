@@ -1,10 +1,10 @@
-// Start of Selection
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Socket, Presence, Channel } from 'phoenix';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Share2, Info, ShoppingCart } from 'lucide-react';
@@ -156,20 +156,19 @@ export default function LiveStream({
                 </div>
               </div>
             </Card>
-            <div className="mt-2 flex gap-2">
-              <input
+            <div className="mt-2">
+              <Input
                 type="text"
                 placeholder="Chat with the seller"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                className="flex-1 p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSend();
+                  }
+                }}
+                className="w-full p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
               />
-              <Button
-                onClick={handleSend}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Send
-              </Button>
             </div>
             {/* Item Info */}
             <div className="mt-2 text-white">
