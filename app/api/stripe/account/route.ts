@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { stripe } from '@/lib/utils';
 
 export async function POST() {
@@ -14,7 +15,7 @@ export async function POST() {
           payments: 'application',
         },
       },
-    });
+    } as any); // Because Stripe typescript type definition is broken
 
     return new Response(JSON.stringify({ account: account.id }), {
       status: 200,
