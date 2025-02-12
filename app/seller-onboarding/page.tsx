@@ -1,12 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function SellerOnboardingPage() {
+  const [token, setToken] = useState<string | null>(null);
   const [accountCreatePending, setAccountCreatePending] = useState(false);
   const [accountLinkCreatePending, setAccountLinkCreatePending] =
     useState(false);
   const [error, setError] = useState(false);
-  const [connectedAccountId, setConnectedAccountId] = useState();
+  const [connectedAccountId, setConnectedAccountId] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    setToken(authToken);
+  }, []);
 
   return (
     <div className="container">
@@ -34,8 +42,11 @@ export default function SellerOnboardingPage() {
             onClick={async () => {
               setAccountCreatePending(true);
               setError(false);
-              fetch('/api/stripe/account', {
+              fetch('https://api.firmsnap.com/stripe/account', {
                 method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
               })
                 .then((response) => response.json())
                 .then((json) => {
@@ -61,10 +72,11 @@ export default function SellerOnboardingPage() {
             onClick={async () => {
               setAccountLinkCreatePending(true);
               setError(false);
-              fetch('/api/stripe/account_link', {
+              fetch('https://api.firmsnap.com/stripe/account_link', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                   account: connectedAccountId,
