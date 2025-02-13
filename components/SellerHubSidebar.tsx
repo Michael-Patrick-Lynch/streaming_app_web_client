@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
+import { useUser } from '@/context/UserContext';
 
 // This is sample data.
 const data = {
@@ -25,6 +26,10 @@ const data = {
           title: 'Shows',
           url: '/manage-shows',
         },
+        {
+          title: 'Financials',
+          url: '/api/stripe/create_login_link',
+        },
       ],
     },
   ],
@@ -33,6 +38,20 @@ const data = {
 export function SellerHubSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const { currentUser } = useUser();
+
+  const handleFinancialsClick = () => {
+    if (!currentUser) {
+      console.error('currentUser is null');
+      return;
+    }
+    window.open(
+      `/api/stripe/create_login_link/${currentUser.stripe_id}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarContent>
@@ -44,7 +63,16 @@ export function SellerHubSidebar({
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <Link href={item.url}>{item.title}</Link>
+                      {item.title === 'Financials' ? (
+                        <button
+                          onClick={handleFinancialsClick}
+                          className="w-full text-left"
+                        >
+                          {item.title}
+                        </button>
+                      ) : (
+                        <Link href={item.url}>{item.title}</Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

@@ -7,6 +7,7 @@ interface User {
   email: string;
   username: string;
   is_seller: boolean;
+  stripe_id: string;
 }
 
 interface UserContextValue {
