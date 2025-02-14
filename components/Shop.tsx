@@ -6,8 +6,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import BuyNowButton from './BuyNowButton';
 
-type Listing = {
+export type Listing = {
   id: string;
   title: string;
   description: string;
@@ -59,18 +60,13 @@ export default function Shop({ sellerName }: ShopProps) {
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(
     new Set()
   );
+  const token = localStorage.getItem('authToken');
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const token = localStorage.getItem('authToken');
         const response = await fetch(
-          `https://api.firmsnap.com/listings/shop/${sellerName}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `https://api.firmsnap.com/listings/shop/${sellerName}`
         );
 
         if (!response.ok) throw new Error('Failed to fetch listings');
@@ -164,17 +160,7 @@ export default function Shop({ sellerName }: ShopProps) {
                   <div className="flex justify-between items-start">
                     <h3 className="text-xl font-semibold">{listing.title}</h3>
                     {listing.type === 'bin' && (
-                      <form
-                        action="/api/stripe/create_checkout_session"
-                        method="POST"
-                      >
-                        <Button
-                          type="submit"
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          Buy Now
-                        </Button>
-                      </form>
+                      <BuyNowButton listing={listing} token={token} />
                     )}
                   </div>
 
