@@ -108,6 +108,15 @@ export default function LiveStream({
               attributes: {
                 playsInline: true,
               },
+              // Override default hls.js options:
+              hlsOptions: {
+                lowLatencyMode: true, // Enables low latency mode
+                liveSyncDurationCount: 1, // Target 1 segment’s worth of latency
+                liveMaxLatencyDurationCount: 3, // Allow a maximum of 3 segments latency
+                maxBufferLength: 1, // Limit total buffer length to 1 second
+                liveBackBufferLength: 0, // No extra backbuffer
+                highBufferWatchdogPeriod: 1, // Check buffering every second
+              },
             },
           }}
         />
