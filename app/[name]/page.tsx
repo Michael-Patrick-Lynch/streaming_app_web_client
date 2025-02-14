@@ -65,7 +65,7 @@ export default function VideoStreamPage({ params }: PageParams) {
       </div>
 
       <div className="flex-grow bg-black text-white">
-        <Shop streamerName={name} />
+        <Shop sellerName={name} />
       </div>
     </div>
   );
