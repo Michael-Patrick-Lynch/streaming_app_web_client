@@ -14,7 +14,7 @@ export default function WatchShowPage() {
         {/* LiveStream Component (chat will be in that component on mobile) */}
         <div className="w-full h-full lg:w-1/3">
           <LiveStream
-            streamUrl="https://api.firmsnap.com/hls/bullshit.m3u8"
+            streamUrl="https://customer-tlb6mk8af2mabbbv.cloudflarestream.com/18d4238b51825269494dfc75ca0f827e/webRTC/play"
             streamerName="bullshit"
             streamerImage="/profile.jpg"
           />

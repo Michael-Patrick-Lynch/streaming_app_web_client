@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { WebRTCPlayer } from '@eyevinn/webrtc-player';
 import { Socket, Presence, Channel } from 'phoenix';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +14,6 @@ interface LiveStreamProps {
   streamerName: string;
   streamerImage: string;
 }
-
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 export default function LiveStream({
   streamUrl,
@@ -30,6 +28,8 @@ export default function LiveStream({
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [channel, setChannel] = useState<Channel | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<WebRTCPlayer | null>(null);
 
   const userId = useMemo(
     () => `anon_${Math.floor(Math.random() * 100000)}`,
@@ -91,33 +91,62 @@ export default function LiveStream({
     };
   }, [streamerName, userId]);
 
+  useEffect(() => {
+    if (!videoRef.current) return;
+
+    playerRef.current = new WebRTCPlayer({
+      video: videoRef.current,
+      type: 'whep',
+      statsTypeFilter: '^candidate-*|^inbound-rtp',
+    });
+
+    const initializePlayer = async () => {
+      try {
+        await playerRef.current?.load(new URL(streamUrl));
+        playerRef.current?.unmute();
+      } catch (error) {
+        console.error('Error initializing WebRTC player:', error);
+      }
+    };
+
+    initializePlayer();
+
+    playerRef.current?.on('no-media', () => {
+      console.log('media timeout occurred');
+    });
+
+    playerRef.current?.on('media-recovered', () => {
+      console.log('media recovered');
+    });
+
+    playerRef.current?.on('stats:inbound-rtp', (report) => {
+      if (report.kind === 'video') {
+        console.log(report);
+      }
+    });
+
+    return () => {
+      playerRef.current?.destroy();
+      playerRef.current = null;
+    };
+  }, [streamUrl]);
+
   return (
     <div className="relative w-full h-full aspect-[9/16] bg-black">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
-        <ReactPlayer
-          url={streamUrl}
-          playing
-          muted
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
           controls
-          width="100%"
-          height="100%"
-          style={{ position: 'absolute', top: 0, left: 0 }}
-          config={{
-            file: {
-              attributes: {
-                playsInline: true,
-              },
-              // Override default hls.js options:
-              hlsOptions: {
-                lowLatencyMode: true, // Enables low latency mode
-                liveSyncDurationCount: 1, // Target 1 segment’s worth of latency
-                liveMaxLatencyDurationCount: 3, // Allow a maximum of 3 segments latency
-                maxBufferLength: 1, // Limit total buffer length to 1 second
-                liveBackBufferLength: 0, // No extra backbuffer
-                highBufferWatchdogPeriod: 1, // Check buffering every second
-              },
-            },
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
           }}
         />
       </div>
