@@ -14,6 +14,11 @@ export function formatCategory(category: string) {
   return catToFormattedCat[category] ?? category;
 }
 
+export const formatCurrency = (amount: number | null): string => {
+  if (amount === null) return 'N/A';
+  return `${(amount / 100).toFixed(2)}`;
+};
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2023-08-16',
 });

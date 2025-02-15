@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Share2, Info, ShoppingCart } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface LiveStreamProps {
   streamUrl: string;
@@ -15,35 +16,110 @@ interface LiveStreamProps {
   streamerImage: string;
 }
 
+type AuctionListing = {
+  id: string;
+  title: string;
+  description: string;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  shipping_domestic_price: {
+    amount: number;
+    currency: string;
+  };
+  shipping_eu_price: {
+    amount: number;
+    currency: string;
+  };
+};
+
+const placeholder_auction: AuctionListing = {
+  id: 'placeholder_id',
+  title: 'Goyard Matignon Long Zipper Wallet w/ Entrupy COA',
+  description: 'Lot #10',
+  price: {
+    amount: 2599,
+    currency: 'EUR',
+  },
+  shipping_domestic_price: {
+    amount: 500,
+    currency: 'EUR',
+  },
+  shipping_eu_price: {
+    amount: 1000,
+    currency: 'EUR',
+  },
+};
+
 export default function LiveStream({
   streamUrl,
   streamerName,
   streamerImage,
 }: LiveStreamProps) {
-  const [highestBid, setHighestBid] = useState(14);
-  const [timeLeft] = useState('2:45');
-  const [itemName] = useState('Vintage Designer Handbag');
-  const [bidCount] = useState(12);
+  // Auction state
+  const [itemId, setItemId] = useState<string | null>();
+  const [itemTitle, setitemTitle] = useState<string>();
+  const [itemDescription, setItemDescription] = useState<string>();
+  const [highestBid, setHighestBid] = useState<number | null>(14);
+  const [startingBid, setStartingBid] = useState<number>();
+  const [timeLeft, setTimeLeft] = useState<number>(10); // seconds
+  const [bidCount, setBidCount] = useState<number>(0);
+  const [domesticShippingPrice, setDomesticShippingPrice] = useState<number>(0);
+  const [euShippingPrice, setEuShippingPrice] = useState<number>(0);
+
+  // Livechat state
   const [viewerCount, setViewerCount] = useState(245);
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [channel, setChannel] = useState<Channel | null>(null);
+
+  // Livestream state
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<WebRTCPlayer | null>(null);
+
+  const start_new_auction = (
+    listing: AuctionListing,
+    duration_in_seconds: number
+  ) => {
+    setItemId(listing.id);
+    setitemTitle(listing.title);
+    setItemDescription(listing.description);
+    setStartingBid(listing.price.amount);
+    setHighestBid(null);
+    setTimeLeft(duration_in_seconds);
+    setBidCount(0);
+    setDomesticShippingPrice(listing.shipping_domestic_price.amount);
+    setEuShippingPrice(listing.shipping_eu_price.amount);
+  };
+
+  useEffect(() => {
+    start_new_auction(placeholder_auction, 10);
+  }, []);
 
   const userId = useMemo(
     () => `anon_${Math.floor(Math.random() * 100000)}`,
     []
   );
 
-  const calculateNextBid = (current: number) => {
-    if (current < 15) return current + 1;
-    if (current <= 25) return current + 5;
-    return current + 10;
+  const calculateNextBid = (current: number | null) => {
+    if (!current) return startingBid ?? null;
+    if (current < 1500) return current + 100;
+    if (current <= 2500) return current + 500;
+    return current + 1000;
   };
 
   const handleBid = () => {
     setHighestBid((prev) => calculateNextBid(prev));
+  };
+
+  const formatTimeLeft = (time_in_seconds_left: number) => {
+    if (time_in_seconds_left < 60) {
+      return `0:${time_in_seconds_left.toString().padStart(2, '0')}`;
+    }
+    const mins = Math.floor(time_in_seconds_left / 60);
+    const secs = time_in_seconds_left % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSend = () => {
@@ -160,11 +236,7 @@ export default function LiveStream({
           </Avatar>
           <div className="text-white">
             <p className="font-semibold">{streamerName}</p>
-            <p className="text-sm">⭐ 4.9 (128)</p>
           </div>
-          <Button className="ml-2 bg-blue-600 text-white h-7 hover:bg-blue-700">
-            Follow
-          </Button>
         </div>
 
         <div className="flex items-center bg-red-600 px-3 py-1 rounded-full">
@@ -208,15 +280,24 @@ export default function LiveStream({
                 className="w-full p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
               />
             </div>
+
             {/* Item Info */}
-            <div className="mt-2 text-white">
-              <h3 className="font-bold text-lg">{itemName}</h3>
-              <div className="flex gap-4 text-sm">
-                <span>🔥 {bidCount} bids</span>
-                <span>🚚 DE: €5.99</span>
-                <span>🌍 EU: €9.99</span>
+            {itemId && (
+              <div className="mt-2 text-white">
+                <h3 className="font-bold text-lg">{itemTitle}</h3>
+                <h3 className="font-bold text-lg">{itemDescription}</h3>
+                <div className="flex gap-4 text-sm">
+                  <span>🔥 {bidCount} bids</span>
+                  <span>
+                    🚚 Domestic Shipping: €
+                    {formatCurrency(domesticShippingPrice)}
+                  </span>
+                  <span>
+                    🌍 EU Shipping: €{formatCurrency(euShippingPrice)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Action Column */}
@@ -244,26 +325,44 @@ export default function LiveStream({
                 <span className="text-xs">Shop</span>
               </Button>
             </div>
-            <div className="text-center">
-              <p className="font-bold text-white">€{highestBid}</p>
-              <p className="text-xs text-white">{timeLeft} left</p>
-            </div>
+            {itemId && (
+              <div className="text-center">
+                {highestBid ? (
+                  <p className="font-bold text-white">
+                    €{formatCurrency(highestBid)}
+                  </p>
+                ) : (
+                  <p className="font-bold text-white">
+                    €{formatCurrency(startingBid || null)}
+                  </p>
+                )}
+                <p className="text-xs text-white">
+                  {formatTimeLeft(timeLeft)} left
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Bid Controls */}
-        <div className="mt-2">
-          <div className="flex gap-2">
-            <Button className="flex-1 bg-gray-700 text-white hover:bg-gray-600">
-              Custom Bid
+        <div className="mt-2 pb-14">
+          {itemId ? (
+            <div className="flex gap-2">
+              <Button className="flex-1 bg-gray-700 text-white hover:bg-gray-600">
+                Custom Bid
+              </Button>
+              <Button
+                onClick={handleBid}
+                className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+              >
+                Bid €{formatCurrency(calculateNextBid(highestBid))}
+              </Button>
+            </div>
+          ) : (
+            <Button className="w-full bg-gray-500 text-white">
+              Waiting for next auction to start
             </Button>
-            <Button
-              onClick={handleBid}
-              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-            >
-              Bid €{calculateNextBid(highestBid)}
-            </Button>
-          </div>
+          )}
         </div>
       </div>
     </div>
