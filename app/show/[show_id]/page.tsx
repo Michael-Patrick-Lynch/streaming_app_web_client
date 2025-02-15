@@ -1,6 +1,7 @@
 'use client';
 
 import LiveStream from '@/components/LiveStream';
+import Shop from '@/components/Shop';
 
 export default function WatchShowPage() {
   return (
@@ -8,7 +9,7 @@ export default function WatchShowPage() {
       <div className="flex flex-col lg:flex-row w-full h-full">
         {/* Shop (Desktop Only) */}
         <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-black p-4">
-          <p>Shop</p>
+          <Shop sellerName={'bullshit'} />
         </div>
 
         {/* LiveStream Component (chat will be in that component on mobile) */}

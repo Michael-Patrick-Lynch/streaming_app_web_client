@@ -15,7 +15,9 @@ export default function ShowCockpit() {
         },
       });
       await client.setIceServersFromEndpoint();
-      const videoIngest = document.querySelector('video#ingest');
+      const videoIngest = document.querySelector(
+        'video#ingest'
+      ) as HTMLVideoElement;
       if (videoIngest) {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: true,
