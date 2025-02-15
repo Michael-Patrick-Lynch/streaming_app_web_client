@@ -246,7 +246,7 @@ export default function LiveStream({
       </div>
 
       {/* Bottom Section */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/2 z-10 p-4 bg-gradient-to-t from-black/60 to-transparent flex flex-col">
+      <div className="absolute bottom-10 lg:bottom-20 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/60 to-transparent flex flex-col">
         <div className="flex flex-1">
           {/* Left Column: Chat, Input & Item Info */}
           <div className="flex-1 pr-4">
