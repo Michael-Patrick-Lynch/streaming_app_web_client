@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Channel, Socket, Presence } from 'phoenix';
+import { Channel, Socket } from 'phoenix';
 import { useEffect, useMemo, useState } from 'react';
 
 interface LiveChatProps {
@@ -15,7 +15,6 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
   const [messages, setMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [channel, setChannel] = useState<Channel | null>(null);
-  const [liveViewerCount, setLiveViewerCount] = useState<number>(0);
   const { currentUser } = useUser();
 
   // userId calculation is using useMemo to prevent it changing on every render
@@ -48,13 +47,6 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
       setMessages((prev) => [...prev, payload.body]);
     });
 
-    // --- PRESENCE SETUP ---
-    const presence = new Presence(c);
-    presence.onSync(() => {
-      const presenceList = presence.list();
-      setLiveViewerCount(Object.keys(presenceList).length);
-    });
-
     setChannel(c);
 
     // Cleanup when unmounting or streamerName changes
@@ -71,33 +63,28 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
   };
 
   return (
-    <div className="p-4 text-white bg-gray-800 h-full">
-      <h2 className="font-bold mb-2">Live Chat for: {streamerName}</h2>
-      {/* Display the viewer count */}
-      <div className="mb-2">
-        <span>Current Viewers: {liveViewerCount}</span>
-      </div>
-      <div className="border border-gray-700 p-2 h-48 overflow-y-auto mb-2">
+    <div className="p-4 text-white h-full w-full flex flex-col">
+      <h2 className="font-bold mb-2">Live Chat</h2>
+      <div className="flex-1 border border-gray-800 p-2 h-96 mb-2">
         {messages.map((msg, idx) => (
           <div key={idx} className="mb-1">
-            {msg}
+            Anon: {msg}
           </div>
         ))}
       </div>
-      <div className="flex">
+      <div className="flex pb-10">
         <input
-          className="flex-1 border border-gray-700 p-1 text-black max-w-sm"
+          className="flex-1 border border-gray-300 h-10 p-4 text-white max-w-sm bg-black rounded-full"
           type="text"
-          placeholder="Say something..."
+          placeholder="Type here..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSend();
+            }
+          }}
         />
-        <button
-          className="ml-2 bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded"
-          onClick={handleSend}
-        >
-          Send
-        </button>
       </div>
     </div>
   );

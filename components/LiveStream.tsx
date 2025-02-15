@@ -208,7 +208,7 @@ export default function LiveStream({
   }, [streamUrl]);
 
   return (
-    <div className="relative w-full h-full aspect-[9/16] bg-black">
+    <div className="relative w-full aspect-[9/16] bg-black">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -241,7 +241,7 @@ export default function LiveStream({
 
         <div className="flex items-center bg-red-600 px-3 py-1 rounded-full">
           <div className="w-2 h-2 bg-white rounded-full mr-2" />
-          <span className="text-white text-sm">{viewerCount} watching</span>
+          <span className="text-white text-sm">{viewerCount / 2} watching</span>
         </div>
       </div>
 
@@ -250,35 +250,37 @@ export default function LiveStream({
         <div className="flex flex-1">
           {/* Left Column: Chat, Input & Item Info */}
           <div className="flex-1 pr-4">
-            {/* Chat Section */}
-            <Card className="mb-2 bg-transparent text-white border-white/20">
-              <div className="p-2 h-[80px] overflow-y-auto">
-                <div className="text-sm">
-                  {chatMessages.length > 0 ? (
-                    chatMessages.map((msg, idx) => (
-                      <p key={idx}>
-                        <span className="font-semibold">Anon:</span> {msg}
-                      </p>
-                    ))
-                  ) : (
-                    <p>No messages yet</p>
-                  )}
+            {/* Chat Section (Only shows here on small screens)*/}
+            <div>
+              <Card className="mb-2 bg-transparent text-white border-white/20 lg:hidden">
+                <div className="p-2 h-[80px] overflow-y-auto">
+                  <div className="text-sm">
+                    {chatMessages.length > 0 ? (
+                      chatMessages.map((msg, idx) => (
+                        <p key={idx}>
+                          <span className="font-semibold">Anon:</span> {msg}
+                        </p>
+                      ))
+                    ) : (
+                      <p>No messages yet</p>
+                    )}
+                  </div>
                 </div>
+              </Card>
+              <div className="mt-2 lg:hidden">
+                <Input
+                  type="text"
+                  placeholder="Chat with the seller"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSend();
+                    }
+                  }}
+                  className="w-full p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
+                />
               </div>
-            </Card>
-            <div className="mt-2">
-              <Input
-                type="text"
-                placeholder="Chat with the seller"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSend();
-                  }
-                }}
-                className="w-full p-2 rounded border border-white/30 bg-black text-white focus:outline-none"
-              />
             </div>
 
             {/* Item Info */}

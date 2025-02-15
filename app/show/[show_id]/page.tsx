@@ -1,11 +1,15 @@
 'use client';
 
+import LiveChat from '@/components/LiveChat';
 import LiveStream from '@/components/LiveStream';
 import Shop from '@/components/Shop';
 
 export default function WatchShowPage() {
   return (
-    <div style={{ height: 'calc(100vh - 64px)' }} className="overflow-hidden">
+    <div
+      style={{ height: 'calc(100vh - 64px)' }}
+      className="overflow-hidden bg-black"
+    >
       <div className="flex flex-col lg:flex-row w-full h-full">
         {/* Shop (Desktop Only) */}
         <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-black p-4">
@@ -23,7 +27,7 @@ export default function WatchShowPage() {
 
         {/* Livechat (Desktop Only) */}
         <div className="hidden lg:flex lg:w-1/3 items-center justify-center bg-black p-4">
-          <p>Livechat</p>
+          <LiveChat streamerName="bullshit" />
         </div>
       </div>
     </div>
