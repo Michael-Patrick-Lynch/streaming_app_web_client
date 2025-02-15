@@ -118,22 +118,22 @@ export default function Shop({ sellerName }: ShopProps) {
         onValueChange={(v) => setActiveTab(v as 'auction' | 'bin' | 'giveaway')}
       >
         <div className="flex justify-between items-center mb-6 w-full grid grid-rows-2 gap-4">
-          <TabsList className="bg-gray-900">
+          <TabsList className="w-full justify-start rounded-none bg-transparent p-0">
             <TabsTrigger
               value="auction"
-              className="data-[state=active]:bg-gray-800 px-4"
+              className="relative data-[state=active]:bg-black data-[state=active]:text-white rounded-none data-[state=active]:border-b px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none"
             >
               Auctions
             </TabsTrigger>
             <TabsTrigger
               value="bin"
-              className="data-[state=active]:bg-gray-800 px-4"
+              className="relative data-[state=active]:bg-black data-[state=active]:text-white rounded-none data-[state=active]:border-b px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none"
             >
               Buy Now
             </TabsTrigger>
             <TabsTrigger
               value="giveaway"
-              className="data-[state=active]:bg-gray-800 px-4"
+              className="relative data-[state=active]:bg-black data-[state=active]:text-white rounded-none data-[state=active]:border-b px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none"
             >
               Giveaways
             </TabsTrigger>
