@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { Listing } from './Shop';
 import { FormEvent } from 'react';
+import { Button } from './ui/button';
 
 type BuyNowButtonProps = {
   listing: Listing;
@@ -27,12 +28,12 @@ export default function BuyNowButton({ listing, token }: BuyNowButtonProps) {
       <input type="hidden" name="listingId" value={listing.id} />
       <input type="hidden" name="quantity" value={1} />
       <input type="hidden" name="token" value={token || ''} />
-      <button
+      <Button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white"
+        className="bg-white hover:bg-slate-200 text-black rounded-full"
       >
         Buy Now
-      </button>
+      </Button>
     </form>
   );
 }

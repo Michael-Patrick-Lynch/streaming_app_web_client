@@ -60,7 +60,11 @@ export default function Shop({ sellerName }: ShopProps) {
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(
     new Set()
   );
-  const token = localStorage.getItem('authToken');
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(localStorage.getItem('authToken'));
+  }, []);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -107,39 +111,36 @@ export default function Shop({ sellerName }: ShopProps) {
         listing.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const getCount = (type: string) =>
-    listings.filter((listing) => listing.type === type).length;
-
   return (
-    <div className="bg-black text-white p-6 rounded-lg border border-gray-800">
+    <div className="bg-black text-white p-6 rounded-lg border border-gray-800 w-full h-full">
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as 'auction' | 'bin' | 'giveaway')}
       >
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 w-full grid grid-rows-2 gap-4">
           <TabsList className="bg-gray-900">
             <TabsTrigger
               value="auction"
               className="data-[state=active]:bg-gray-800 px-4"
             >
-              Auctions ({getCount('auction')})
+              Auctions
             </TabsTrigger>
             <TabsTrigger
               value="bin"
               className="data-[state=active]:bg-gray-800 px-4"
             >
-              Buy Now ({getCount('bin')})
+              Buy Now
             </TabsTrigger>
             <TabsTrigger
               value="giveaway"
               className="data-[state=active]:bg-gray-800 px-4"
             >
-              Giveaways ({getCount('giveaway')})
+              Giveaways
             </TabsTrigger>
           </TabsList>
           <Input
             placeholder="Search listings..."
-            className="w-64 bg-gray-900 border-gray-800 text-white"
+            className="bg-gray-900 border-gray-800 text-white w-64"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -164,7 +165,7 @@ export default function Shop({ sellerName }: ShopProps) {
                     )}
                   </div>
 
-                  <div className="text-gray-300">
+                  <div className="text-slate-400">
                     {expandedDescriptions.has(listing.id)
                       ? listing.description
                       : `${listing.description.slice(0, 100)}${listing.description.length > 100 ? '...' : ''}`}
@@ -181,13 +182,15 @@ export default function Shop({ sellerName }: ShopProps) {
                     )}
                   </div>
 
-                  <div className="flex gap-6 text-gray-400">
+                  <div className="flex gap-6 text-white">
                     {listing.quantity !== null && (
-                      <div>Quantity: {listing.quantity}</div>
+                      <div className="text-slate-400">
+                        {listing.quantity} Available
+                      </div>
                     )}
                     {listing.price && (
                       <div>
-                        Price:{' '}
+                        {' '}
                         {new Intl.NumberFormat('en-US', {
                           style: 'currency',
                           currency: listing.price.currency,
@@ -205,7 +208,7 @@ export default function Shop({ sellerName }: ShopProps) {
           ))}
 
           {filteredListings.length === 0 && (
-            <div className="text-center text-gray-500 py-12">
+            <div className="text-center text-white py-12">
               No listings found in this category
             </div>
           )}
