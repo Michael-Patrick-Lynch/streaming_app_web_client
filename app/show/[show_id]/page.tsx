@@ -3,8 +3,33 @@
 import LiveChat from '@/components/LiveChat';
 import LiveStream from '@/components/LiveStream';
 import Shop from '@/components/Shop';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function WatchShowPage() {
+  const { show_id } = useParams();
+  const [playUrl, setPlayUrl] = useState<string>();
+
+  useEffect(() => {
+    async function fetchShowData() {
+      try {
+        const response = await fetch(
+          `https://api.firmsnap.com/shows/${show_id}`
+        );
+        const showData = await response.json();
+        const play_url = showData.play_url;
+        if (!play_url) {
+          console.error('play_url not found in show data');
+          return;
+        }
+        setPlayUrl(play_url);
+      } catch (error) {
+        console.error('Failed to fetch show data:', error);
+      }
+    }
+    fetchShowData();
+  }, [show_id]);
+
   return (
     <div
       style={{ height: 'calc(100vh - 64px)' }}
@@ -18,11 +43,15 @@ export default function WatchShowPage() {
 
         {/* LiveStream Component (chat will be in that component on mobile) */}
         <div className="w-full h-full lg:w-1/3">
-          <LiveStream
-            streamUrl="https://customer-tlb6mk8af2mabbbv.cloudflarestream.com/18d4238b51825269494dfc75ca0f827e/webRTC/play"
-            streamerName="bullshit"
-            streamerImage="/profile.jpg"
-          />
+          {playUrl ? (
+            <LiveStream
+              streamUrl={playUrl}
+              streamerName="bullshit"
+              streamerImage="/profile.jpeg"
+            />
+          ) : (
+            <p className="text-white">Loading ...</p>
+          )}
         </div>
 
         {/* Livechat (Desktop Only) */}

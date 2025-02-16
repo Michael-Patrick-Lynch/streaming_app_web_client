@@ -241,7 +241,7 @@ export default function LiveStream({
 
         <div className="flex items-center bg-red-600 px-3 py-1 rounded-full">
           <div className="w-2 h-2 bg-white rounded-full mr-2" />
-          <span className="text-white text-sm">{viewerCount / 2} watching</span>
+          <span className="text-white text-sm">{viewerCount} watching</span>
         </div>
       </div>
 
