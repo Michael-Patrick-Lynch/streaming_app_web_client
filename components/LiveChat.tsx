@@ -29,7 +29,7 @@ export default function LiveChat({ streamerName }: LiveChatProps) {
     console.log('Will now attempt to open the socket');
     socket.onOpen(() => console.log('Socket opened.'));
     socket.onClose(() => console.log('Socket closed.'));
-    socket.onError((err) => console.log('Socket error:', err));
+    // socket.onError((err) => console.log('Socket error:', err));
     socket.connect();
 
     // Join the channel for this streamer

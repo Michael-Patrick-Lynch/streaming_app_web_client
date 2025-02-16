@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Share2, Info, ShoppingCart } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from './ui/dialog';
+import Shop from './Shop';
 
 interface LiveStreamProps {
   streamUrl: string;
@@ -134,7 +136,7 @@ export default function LiveStream({
     console.log('Connecting to live chat socket...');
     socket.onOpen(() => console.log('Socket opened.'));
     socket.onClose(() => console.log('Socket closed.'));
-    socket.onError((err) => console.error('Socket error:', err));
+    // socket.onError((err) => console.error('Socket error:', err));
     socket.connect();
 
     const newChannel = socket.channel(`streamer:${streamerName}`, {
@@ -319,13 +321,26 @@ export default function LiveStream({
                 <Info className="w-6 h-6" />
                 <span className="text-xs">My Info</span>
               </Button>
-              <Button
-                variant="ghost"
-                className="flex flex-col h-fit p-2 text-white"
-              >
-                <ShoppingCart className="w-6 h-6" />
-                <span className="text-xs">Shop</span>
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex flex-col h-fit p-2 text-white"
+                  >
+                    <ShoppingCart className="w-6 h-6" />
+                    <span className="text-xs">Shop</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="fixed inset-0 w-screen h-screen transform-none max-w-none rounded-none bg-black border-none">
+                  <div className="absolute top-4 right-4">
+                    <DialogClose className="text-white text-4xl">×</DialogClose>
+                  </div>
+                  <div className="w-full h-full pt-12">
+                    {' '}
+                    <Shop sellerName={streamerName} />
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             {itemId && (
               <div className="text-center">
