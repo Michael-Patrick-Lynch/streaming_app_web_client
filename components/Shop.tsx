@@ -19,6 +19,15 @@ export type Listing = {
     currency: string;
   } | null;
   image: string;
+  seller_country: string;
+  shipping_domestic_price: {
+    amount: number;
+    currency: string;
+  };
+  shipping_eu_price: {
+    amount: number;
+    currency: string;
+  };
 };
 
 interface APIListing {
@@ -29,6 +38,9 @@ interface APIListing {
   quantity?: number;
   price?: { amount: number; currency: string };
   picture_url?: string;
+  seller_country: string;
+  shipping_domestic_price: { amount: number; currency: string };
+  shipping_eu_price: { amount: number; currency: string };
 }
 
 const formatListing = (listing: APIListing): Listing => ({
@@ -45,6 +57,9 @@ const formatListing = (listing: APIListing): Listing => ({
           currency: listing.price.currency,
         },
   image: listing.picture_url || '/placeholder-image.jpg',
+  seller_country: listing.seller_country,
+  shipping_domestic_price: listing.shipping_domestic_price,
+  shipping_eu_price: listing.shipping_eu_price,
 });
 
 interface ShopProps {
