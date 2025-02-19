@@ -83,6 +83,38 @@ export async function POST(req: Request) {
         'https://firmsnap.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
     });
 
+    // Schedule session expiration if reservation is still pending after a certain amount of time
+    // (if reservation is still pending, that means payment has not been processed yet)
+    setTimeout(
+      async () => {
+        const getReservationResponse = await fetch(
+          `https://api.firmsnap.com/reservations/${reservation_id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const {
+          reservation: { status },
+        } = await getReservationResponse.json();
+
+        if (status === 'pending') {
+          const stripeResponse = await stripe.checkout.sessions.expire(
+            session.id
+          );
+          console.log(
+            `Received response from Stripe when expiring session ${session.id}:`,
+            stripeResponse
+          );
+        }
+      },
+      5 * 60 * 1000
+    ); // 5 minutes in milliseconds
+
     return NextResponse.redirect(session.url as string, 303);
   } catch (error) {
     await fetch(
