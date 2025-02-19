@@ -176,7 +176,9 @@ export default function Shop({ sellerName }: ShopProps) {
                   <div className="flex justify-between items-start">
                     <h3 className="text-xl font-semibold">{listing.title}</h3>
                     {listing.type === 'bin' && (
-                      <BuyNowButton listing={listing} token={token} />
+                      <div className="hidden md:block">
+                        <BuyNowButton listing={listing} token={token} />
+                      </div>
                     )}
                   </div>
 
@@ -197,7 +199,7 @@ export default function Shop({ sellerName }: ShopProps) {
                     )}
                   </div>
 
-                  <div className="flex gap-6 text-white">
+                  <div className="grid flex gap-6 text-white">
                     {listing.quantity !== null && (
                       <div className="text-slate-400">
                         {listing.quantity} Available
@@ -216,6 +218,11 @@ export default function Shop({ sellerName }: ShopProps) {
                       <div className="text-yellow-400">Starting Bid</div>
                     )}
                   </div>
+                  {listing.type === 'bin' && (
+                    <div className="block md:hidden mt-2">
+                      <BuyNowButton listing={listing} token={token} />
+                    </div>
+                  )}
                 </div>
               </div>
               <Separator className="bg-gray-800" />

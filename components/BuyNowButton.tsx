@@ -54,7 +54,7 @@ export default function BuyNowButton({ listing, token }: BuyNowButtonProps) {
       <DialogTrigger asChild>
         <Button
           type="button"
-          className="bg-white hover:bg-slate-200 text-black rounded-full"
+          className="bg-white hover:bg-slate-200 text-black rounded-none"
         >
           Buy Now
         </Button>
