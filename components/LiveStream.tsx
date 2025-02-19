@@ -335,7 +335,7 @@ export default function LiveStream({
                   <div className="absolute top-4 right-4">
                     <DialogClose className="text-white text-4xl">×</DialogClose>
                   </div>
-                  <div className="w-full h-full pt-12">
+                  <div className="w-full h-full pt-12 overflow-auto">
                     {' '}
                     <Shop sellerName={streamerName} />
                   </div>

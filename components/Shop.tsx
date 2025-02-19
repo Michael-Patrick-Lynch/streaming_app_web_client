@@ -127,7 +127,7 @@ export default function Shop({ sellerName }: ShopProps) {
     );
 
   return (
-    <div className="bg-black text-white p-6 rounded-lg border border-gray-800 w-full h-full">
+    <div className="bg-black text-white p-6 rounded-lg border border-gray-800 w-full h-full overflow-auto">
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as 'auction' | 'bin' | 'giveaway')}
