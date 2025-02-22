@@ -39,13 +39,34 @@ export default function ShowCockpit() {
         return;
       }
 
-      // Initialize WHIP client with the obtained publish_url.
+      // Create a custom peer connection factory to enforce sendonly
+      // Without setting sendonly, the client does not work on Safari
+      const peerConnectionFactory = (config: RTCConfiguration) => {
+        const pc = new RTCPeerConnection(config);
+
+        // Override addTrack to automatically set direction
+        const originalAddTrack = pc.addTrack.bind(pc);
+        pc.addTrack = (track: MediaStreamTrack, ...streams: MediaStream[]) => {
+          const sender = originalAddTrack(track, ...streams);
+          const transceiver = pc
+            .getTransceivers()
+            .find((t) => t.sender === sender);
+          if (transceiver) {
+            transceiver.direction = 'sendonly';
+          }
+          return sender;
+        };
+        return pc;
+      };
+
+      // Initialize WHIP client with custom factory
       const client = new WHIPClient({
         endpoint: publishUrl,
         opts: {
           debug: true,
           iceServers: [{ urls: 'stun:stun.l.google.com:19320' }],
         },
+        peerConnectionFactory, // Use custom factory
       });
 
       const videoIngest = document.querySelector(
@@ -57,6 +78,8 @@ export default function ShowCockpit() {
           audio: true,
         });
         videoIngest.srcObject = mediaStream;
+
+        // Ingest will use the custom peer connection with sendonly tracks
         await client.ingest(mediaStream);
         setIsLive(true);
       }
