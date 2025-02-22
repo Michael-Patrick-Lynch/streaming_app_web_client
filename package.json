@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "npm run lint && npm run format && next build",
+    "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write ."
@@ -36,6 +37,7 @@
     "hls.js": "^1.5.18",
     "lucide-react": "^0.469.0",
     "next": "15.1.2",
+    "next-sitemap": "^4.2.3",
     "phoenix": "^1.7.18",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
