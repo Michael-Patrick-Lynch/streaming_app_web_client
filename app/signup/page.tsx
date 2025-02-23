@@ -14,6 +14,45 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+function getCountries() {
+  return [
+    'Austria',
+    'Belgium',
+    'Bulgaria',
+    'Croatia',
+    'Cyprus',
+    'Czech Republic',
+    'Denmark',
+    'Estonia',
+    'Finland',
+    'France',
+    'Germany',
+    'Greece',
+    'Hungary',
+    'Ireland',
+    'Italy',
+    'Latvia',
+    'Lithuania',
+    'Luxembourg',
+    'Malta',
+    'Netherlands',
+    'Poland',
+    'Portugal',
+    'Romania',
+    'Slovakia',
+    'Slovenia',
+    'Spain',
+    'Sweden',
+  ];
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,6 +60,7 @@ export default function SignupPage() {
     email: '',
     username: '',
     password: '',
+    country: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,6 +71,7 @@ export default function SignupPage() {
           email: formData.email,
           username: formData.username,
           password: formData.password,
+          country: formData.country,
         },
       });
       router.push('/login');
@@ -87,6 +128,26 @@ export default function SignupPage() {
                     onChange={handleChange}
                     required
                   />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="country">Country</Label>
+                  <Select
+                    value={formData.country}
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, country: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-40">
+                      {getCountries().map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <CardFooter className="flex justify-end px-0 pt-4">
