@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     return new Response('Inventory unavailable', { status: 400 });
   }
 
-  const { reservation_id, reference_id } = await reserveRes.json();
+  const { reservation_id, checkout_reference_id } = await reserveRes.json();
 
   try {
     const listingRes = await fetch(
@@ -75,10 +75,10 @@ export async function POST(req: Request) {
         },
       ],
       payment_intent_data: {
-        transfer_group: reference_id,
+        transfer_group: checkout_reference_id,
       },
       mode: 'payment',
-      client_reference_id: reference_id,
+      client_reference_id: checkout_reference_id,
       success_url:
         'https://firmsnap.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
     });

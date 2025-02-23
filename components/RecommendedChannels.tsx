@@ -21,17 +21,7 @@ export function RecommendedChannels() {
 
   useEffect(() => {
     async function fetchSellers() {
-      try {
-        const response = await fetch('https://api.firmsnap.com/shop/sellers');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setSellers(data || []);
-      } catch (error) {
-        console.error('Failed to fetch sellers:', error);
-        setSellers([]);
-      }
+      setSellers(['Firmsnap Events']);
     }
     fetchSellers();
   }, []);
