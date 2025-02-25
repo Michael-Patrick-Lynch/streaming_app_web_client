@@ -14,6 +14,7 @@ export type Listing = {
   description: string;
   type: 'auction' | 'bin' | 'giveaway';
   quantity: number | null;
+  reserved_quantity: number | null;
   price: {
     amount: number;
     currency: string;
@@ -36,6 +37,7 @@ interface APIListing {
   description: string;
   type: 'auction' | 'bin' | 'giveaway';
   quantity?: number;
+  reserved_quantity?: number;
   price?: { amount: number; currency: string };
   picture_url?: string;
   seller_country: string;
@@ -49,6 +51,7 @@ const formatListing = (listing: APIListing): Listing => ({
   description: listing.description,
   type: listing.type,
   quantity: listing.type === 'giveaway' ? null : (listing.quantity ?? null),
+  reserved_quantity: listing.type === 'giveaway' ? null : (listing.reserved_quantity ?? null),
   price:
     listing.type === 'giveaway' || !listing.price
       ? null
@@ -200,9 +203,9 @@ export default function Shop({ sellerName }: ShopProps) {
                   </div>
 
                   <div className="grid flex gap-6 text-white">
-                    {listing.quantity !== null && (
+                    {listing.quantity !== null && listing.reserved_quantity !== null && (
                       <div className="text-slate-400">
-                        {listing.quantity} Available
+                        {listing.quantity - listing.reserved_quantity} Available
                       </div>
                     )}
                     {listing.price && (
