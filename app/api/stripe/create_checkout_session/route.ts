@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       client_reference_id: checkout_reference_id,
       success_url:
         'https://firmsnap.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 30, // Configured to expire after 30 mins
     });
 
     // Schedule session expiration if reservation is still pending after a certain amount of time
