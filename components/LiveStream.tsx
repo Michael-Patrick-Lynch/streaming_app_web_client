@@ -12,6 +12,7 @@ import { formatCurrency } from '@/lib/utils';
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from './ui/dialog';
 import Shop from './Shop';
 import { useUser } from '@/context/UserContext';
+import { useRouter } from 'next/navigation';
 
 interface LiveStreamProps {
   streamUrl: string;
@@ -54,6 +55,7 @@ export default function LiveStream({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { currentUser } = useUser();
+  const router = useRouter();
 
   // Load auth token from localStorage
   useEffect(() => {
@@ -109,8 +111,13 @@ export default function LiveStream({
   const handleBid = () => {
     if (!auctionChannel || !auctionActive || !auctionId) return;
 
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+
     const bidAmount = calculateNextBid(highestBid);
-    if (bidAmount && currentUser) {
+    if (bidAmount) {
       auctionChannel.push('bid', {
         amount: {
           amount: bidAmount,
@@ -123,16 +130,16 @@ export default function LiveStream({
   };
 
   const handleCustomBid = () => {
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+
     if (!auctionChannel || !auctionActive || !auctionId || !customBidAmount)
       return;
 
     const bidAmount = parseFloat(customBidAmount);
     if (!isNaN(bidAmount) && bidAmount > (highestBid || startingBid || 0)) {
-      if (!currentUser) {
-        console.warn('Cannot join place bid: currentUser is null');
-        return;
-      }
-
       auctionChannel.push('bid', {
         amount: {
           amount: bidAmount,
@@ -164,11 +171,6 @@ export default function LiveStream({
 
   // Setup Phoenix socket and channels
   useEffect(() => {
-    if (!currentUser) {
-      console.warn('Cannot join channels: currentUser is null');
-      return;
-    }
-
     const socket = new Socket('wss://api.firmsnap.com/socket');
     console.log('Connecting to socket...');
     socket.onOpen(() => console.log('Socket opened.'));
@@ -177,7 +179,7 @@ export default function LiveStream({
 
     // Chat channel
     const newChatChannel = socket.channel(`streamer:${streamerName}`, {
-      user_id: currentUser.id,
+      user_id: currentUser ? currentUser.id : 'anon',
     });
     setChatChannel(newChatChannel);
 
@@ -202,7 +204,7 @@ export default function LiveStream({
 
     // Auction channel
     const newAuctionChannel = socket.channel(`auctioneer:${streamerName}`, {
-      user_id: currentUser.id,
+      user_id: currentUser ? currentUser.id : 'anon',
     });
     setAuctionChannel(newAuctionChannel);
 
