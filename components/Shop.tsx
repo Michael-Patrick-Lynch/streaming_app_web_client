@@ -43,6 +43,7 @@ interface APIListing {
   seller_country: string;
   shipping_domestic_price: { amount: number; currency: string };
   shipping_eu_price: { amount: number; currency: string };
+  starting_bid: { amount: number; currency: string };
 }
 
 const formatListing = (listing: APIListing): Listing => ({
@@ -54,12 +55,19 @@ const formatListing = (listing: APIListing): Listing => ({
   reserved_quantity:
     listing.type === 'giveaway' ? null : (listing.reserved_quantity ?? null),
   price:
-    listing.type === 'giveaway' || !listing.price
+    listing.type === 'giveaway'
       ? null
-      : {
-          amount: listing.price.amount / 100,
-          currency: listing.price.currency,
-        },
+      : listing.type === 'auction'
+        ? {
+            amount: listing.starting_bid.amount / 100,
+            currency: listing.starting_bid.currency,
+          }
+        : listing.price
+          ? {
+              amount: listing.price.amount / 100,
+              currency: listing.price.currency,
+            }
+          : null,
   image: listing.picture_url || '/placeholder-image.jpg',
   seller_country: listing.seller_country,
   shipping_domestic_price: listing.shipping_domestic_price,
@@ -211,22 +219,26 @@ export default function Shop({ sellerName }: ShopProps) {
                           Available
                         </div>
                       )}
-                    {listing.price && (
-                      <div>
-                        {' '}
+                    {listing.type === 'auction' && listing.price && (
+                      <div className="text-yellow-400">
+                        Starting Bid:{' '}
                         {new Intl.NumberFormat('en-US', {
                           style: 'currency',
                           currency: listing.price.currency,
                         }).format(listing.price.amount)}
                       </div>
                     )}
-                    {listing.type === 'auction' && (
-                      <div className="text-yellow-400">Starting Bid</div>
-                    )}
                   </div>
-                  {listing.type === 'bin' && (
-                    <div className="block md:hidden mt-2">
-                      <BuyNowButton listing={listing} token={token} />
+                  {listing.type === 'bin' && listing.price && (
+                    <div>
+                      {' '}
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: listing.price.currency,
+                      }).format(listing.price.amount)}
+                      <div className="block md:hidden mt-2">
+                        <BuyNowButton listing={listing} token={token} />
+                      </div>
                     </div>
                   )}
                 </div>

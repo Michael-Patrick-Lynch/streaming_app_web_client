@@ -136,7 +136,10 @@ export function SellerInventoryTable() {
           category:
             l.category == 'trading_card_games' ? 'Trading Card Games' : 'N/A',
           quantity: l.quantity,
-          price_with_currency: [l.price.amount / 100, l.price.currency],
+          price_with_currency:
+            l.type === 'bin'
+              ? [l.price.amount / 100, l.price.currency]
+              : [l.starting_bid.amount / 100, l.starting_bid.currency],
           listingType:
             l.type === 'bin'
               ? 'Buy-It-Now'

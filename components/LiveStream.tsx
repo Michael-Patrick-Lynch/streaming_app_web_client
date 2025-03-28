@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { WebRTCPlayer } from '@eyevinn/webrtc-player';
 import { Socket, Presence, Channel } from 'phoenix';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Share2, Info, ShoppingCart } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from './ui/dialog';
 import Shop from './Shop';
+import { useUser } from '@/context/UserContext';
 
 interface LiveStreamProps {
   streamUrl: string;
@@ -18,101 +19,131 @@ interface LiveStreamProps {
   streamerImage: string;
 }
 
-type AuctionListing = {
-  id: string;
-  title: string;
-  description: string;
-  price: {
-    amount: number;
-    currency: string;
-  };
-  shipping_domestic_price: {
-    amount: number;
-    currency: string;
-  };
-  shipping_eu_price: {
-    amount: number;
-    currency: string;
-  };
-};
-
-const placeholder_auction: AuctionListing = {
-  id: 'placeholder_id',
-  title: 'Goyard Matignon Long Zipper Wallet w/ Entrupy COA',
-  description: 'Lot #10',
-  price: {
-    amount: 2599,
-    currency: 'EUR',
-  },
-  shipping_domestic_price: {
-    amount: 500,
-    currency: 'EUR',
-  },
-  shipping_eu_price: {
-    amount: 1000,
-    currency: 'EUR',
-  },
-};
-
 export default function LiveStream({
   streamUrl,
   streamerName,
   streamerImage,
 }: LiveStreamProps) {
   // Auction state
-  const [itemId, setItemId] = useState<string | null>();
-  const [itemTitle, setitemTitle] = useState<string>();
-  const [itemDescription, setItemDescription] = useState<string>();
-  const [highestBid, setHighestBid] = useState<number | null>(14);
-  const [startingBid, setStartingBid] = useState<number>();
-  const [timeLeft, setTimeLeft] = useState<number>(10); // seconds
+  const [auctionId, setAuctionId] = useState<string | null>(null);
+  const [itemId, setItemId] = useState<string | null>(null);
+  const [itemTitle, setItemTitle] = useState<string>('');
+  const [itemDescription, setItemDescription] = useState<string>('');
+  const [highestBid, setHighestBid] = useState<number | null>(null);
+  const [startingBid, setStartingBid] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(0); // seconds
   const [bidCount, setBidCount] = useState<number>(0);
   const [domesticShippingPrice, setDomesticShippingPrice] = useState<number>(0);
   const [euShippingPrice, setEuShippingPrice] = useState<number>(0);
+  const [auctionActive, setAuctionActive] = useState<boolean>(false);
+  const [auctionEndTime, setAuctionEndTime] = useState<number | null>(null);
+  const [customBidAmount, setCustomBidAmount] = useState<string>('');
+  const [showCustomBidInput, setShowCustomBidInput] = useState<boolean>(false);
 
   // Livechat state
-  const [viewerCount, setViewerCount] = useState(245);
+  const [viewerCount, setViewerCount] = useState(0);
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [channel, setChannel] = useState<Channel | null>(null);
+  const [chatChannel, setChatChannel] = useState<Channel | null>(null);
+  const [auctionChannel, setAuctionChannel] = useState<Channel | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   // Livestream state
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<WebRTCPlayer | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const start_new_auction = (
-    listing: AuctionListing,
-    duration_in_seconds: number
-  ) => {
-    setItemId(listing.id);
-    setitemTitle(listing.title);
-    setItemDescription(listing.description);
-    setStartingBid(listing.price.amount);
-    setHighestBid(null);
-    setTimeLeft(duration_in_seconds);
-    setBidCount(0);
-    setDomesticShippingPrice(listing.shipping_domestic_price.amount);
-    setEuShippingPrice(listing.shipping_eu_price.amount);
-  };
+  const { currentUser } = useUser();
 
+  // Load auth token from localStorage
   useEffect(() => {
-    start_new_auction(placeholder_auction, 10);
+    const storedToken = localStorage.getItem('authToken');
+    setToken(storedToken);
   }, []);
 
-  const userId = useMemo(
-    () => `anon_${Math.floor(Math.random() * 100000)}`,
-    []
-  );
+  // Update time left for auction
+  useEffect(() => {
+    if (!auctionActive || auctionEndTime === null) return;
+
+    const updateTimeLeft = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((auctionEndTime - now) / 1000));
+
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        setAuctionActive(false);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      }
+    };
+
+    updateTimeLeft();
+    timerRef.current = setInterval(updateTimeLeft, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [auctionActive, auctionEndTime]);
 
   const calculateNextBid = (current: number | null) => {
-    if (!current) return startingBid ?? null;
-    if (current < 1500) return current + 100;
-    if (current <= 2500) return current + 500;
-    return current + 1000;
+    // starting bid defaults to 0 if null
+    const starting = startingBid ?? 0;
+
+    // current bid defaults to starting bid if null
+    current = current ?? starting;
+
+    if (current < 1000) return current + 100;
+    if (current < 2000) return current + 300;
+    if (current < 3000) return current + 500;
+    if (current < 4000) return current + 800;
+    if (current < 10000) return current + 1000;
+    return current + 2000;
   };
 
   const handleBid = () => {
-    setHighestBid((prev) => calculateNextBid(prev));
+    if (!auctionChannel || !auctionActive || !auctionId) return;
+
+    const bidAmount = calculateNextBid(highestBid);
+    if (bidAmount && currentUser) {
+      auctionChannel.push('bid', {
+        amount: {
+          amount: bidAmount,
+          currency: 'EUR',
+        },
+        auction_id: auctionId,
+        bidder_user_id: currentUser.id,
+      });
+    }
+  };
+
+  const handleCustomBid = () => {
+    if (!auctionChannel || !auctionActive || !auctionId || !customBidAmount)
+      return;
+
+    const bidAmount = parseFloat(customBidAmount);
+    if (!isNaN(bidAmount) && bidAmount > (highestBid || startingBid || 0)) {
+      if (!currentUser) {
+        console.warn('Cannot join place bid: currentUser is null');
+        return;
+      }
+
+      auctionChannel.push('bid', {
+        amount: {
+          amount: bidAmount,
+          currency: 'EUR',
+        },
+        auction_id: auctionId,
+        bidder_user_id: currentUser.id,
+      });
+      setShowCustomBidInput(false);
+      setCustomBidAmount('');
+    }
   };
 
   const formatTimeLeft = (time_in_seconds_left: number) => {
@@ -125,50 +156,137 @@ export default function LiveStream({
   };
 
   const handleSend = () => {
-    if (inputValue.trim() && channel) {
-      channel.push('new_msg', { body: inputValue });
+    if (inputValue.trim() && chatChannel) {
+      chatChannel.push('new_msg', { body: inputValue });
       setInputValue('');
     }
   };
 
+  // Setup Phoenix socket and channels
   useEffect(() => {
+    if (!currentUser) {
+      console.warn('Cannot join channels: currentUser is null');
+      return;
+    }
+
     const socket = new Socket('wss://api.firmsnap.com/socket');
-    console.log('Connecting to live chat socket...');
+    console.log('Connecting to socket...');
     socket.onOpen(() => console.log('Socket opened.'));
     socket.onClose(() => console.log('Socket closed.'));
-    // socket.onError((err) => console.error('Socket error:', err));
     socket.connect();
 
-    const newChannel = socket.channel(`streamer:${streamerName}`, {
-      user_id: userId,
+    // Chat channel
+    const newChatChannel = socket.channel(`streamer:${streamerName}`, {
+      user_id: currentUser.id,
     });
-    setChannel(newChannel);
+    setChatChannel(newChatChannel);
 
-    newChannel
+    newChatChannel
       .join()
       .receive('ok', (resp: Record<string, unknown>) =>
-        console.log('Joined channel successfully:', resp)
+        console.log('Joined chat channel successfully:', resp)
       )
       .receive('error', (resp: Record<string, unknown>) =>
-        console.error('Unable to join channel:', resp)
+        console.error('Unable to join chat channel:', resp)
       );
 
-    newChannel.on('new_msg', (payload: { body: string }) => {
+    newChatChannel.on('new_msg', (payload: { body: string }) => {
       setChatMessages((prev) => [...prev, payload.body]);
     });
 
-    const presence = new Presence(newChannel);
+    const presence = new Presence(newChatChannel);
     presence.onSync(() => {
       const presenceList = presence.list();
       setViewerCount(Object.keys(presenceList).length);
     });
 
+    // Auction channel
+    const newAuctionChannel = socket.channel(`auctioneer:${streamerName}`, {
+      user_id: currentUser.id,
+    });
+    setAuctionChannel(newAuctionChannel);
+
+    newAuctionChannel
+      .join()
+      .receive('ok', (resp: Record<string, unknown>) =>
+        console.log('Joined auction channel successfully:', resp)
+      )
+      .receive('error', (resp: Record<string, unknown>) =>
+        console.error('Unable to join auction channel:', resp)
+      );
+
+    // Handle auction events
+    newAuctionChannel.on(
+      'auction_started',
+      (payload: {
+        auction_id: string;
+        listing_id: string;
+        title: string;
+        description: string;
+        starting_bid: { amount: number; currency: string };
+        duration_ms: number;
+        shipping_domestic_price: { amount: number; currency: string };
+        shipping_eu_price: { amount: number; currency: string };
+      }) => {
+        console.log('Auction started:', payload);
+        setAuctionId(payload.auction_id);
+        setItemId(payload.listing_id);
+        setItemTitle(payload.title);
+        setItemDescription(payload.description);
+        setStartingBid(payload.starting_bid.amount);
+        setHighestBid(null);
+        setBidCount(0);
+        setDomesticShippingPrice(payload.shipping_domestic_price.amount);
+        setEuShippingPrice(payload.shipping_eu_price.amount);
+        setAuctionActive(true);
+        setAuctionEndTime(Date.now() + payload.duration_ms);
+      }
+    );
+
+    newAuctionChannel.on(
+      'new_bid',
+      (payload: {
+        auction_id: string;
+        amount: { amount: number; currency: string };
+        bidder: string;
+      }) => {
+        console.log('New bid received:', payload);
+        if (payload.auction_id === auctionId) {
+          setHighestBid(payload.amount.amount);
+          setBidCount((prev) => prev + 1);
+        }
+      }
+    );
+
+    newAuctionChannel.on(
+      'auction_closed',
+      (payload: {
+        auction_id: string;
+        winner: string | null;
+        final_amount: { amount: number; currency: string } | null;
+      }) => {
+        console.log('Auction closed:', payload);
+        if (payload.auction_id === auctionId) {
+          setAuctionActive(false);
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+        }
+      }
+    );
+
     return () => {
-      newChannel.leave();
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      newChatChannel.leave();
+      newAuctionChannel.leave();
       socket.disconnect();
     };
-  }, [streamerName, userId]);
+  }, [streamerName, currentUser, token, auctionId]);
 
+  // Initialize WebRTC player
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -350,11 +468,13 @@ export default function LiveStream({
                   </p>
                 ) : (
                   <p className="font-bold text-white">
-                    €{formatCurrency(startingBid || null)}
+                    €{formatCurrency(startingBid)}
                   </p>
                 )}
                 <p className="text-xs text-white">
-                  {formatTimeLeft(timeLeft)} left
+                  {auctionActive
+                    ? `${formatTimeLeft(timeLeft)} left`
+                    : 'Auction ended'}
                 </p>
               </div>
             )}
@@ -363,9 +483,34 @@ export default function LiveStream({
 
         {/* Bid Controls */}
         <div className="mt-2 pb-14">
-          {itemId ? (
+          {showCustomBidInput ? (
             <div className="flex gap-2">
-              <Button className="flex-1 bg-gray-700 text-white hover:bg-gray-600">
+              <Input
+                type="number"
+                placeholder="Enter bid amount"
+                value={customBidAmount}
+                onChange={(e) => setCustomBidAmount(e.target.value)}
+                className="flex-1 bg-gray-800 text-white border-gray-700"
+              />
+              <Button
+                onClick={handleCustomBid}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+              >
+                Bid
+              </Button>
+              <Button
+                onClick={() => setShowCustomBidInput(false)}
+                className="bg-gray-700 text-white hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : itemId && auctionActive ? (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowCustomBidInput(true)}
+                className="flex-1 bg-gray-700 text-white hover:bg-gray-600"
+              >
                 Custom Bid
               </Button>
               <Button
@@ -375,8 +520,12 @@ export default function LiveStream({
                 Bid €{formatCurrency(calculateNextBid(highestBid))}
               </Button>
             </div>
+          ) : itemId && !auctionActive ? (
+            <Button className="w-full bg-gray-500 text-white" disabled>
+              Auction ended
+            </Button>
           ) : (
-            <Button className="w-full bg-gray-500 text-white">
+            <Button className="w-full bg-gray-500 text-white" disabled>
               Waiting for next auction to start
             </Button>
           )}
