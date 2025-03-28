@@ -13,14 +13,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const { setCurrentUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -46,7 +44,8 @@ export default function LoginPage() {
       expirationDate.setDate(expirationDate.getDate() + expirationDays);
       document.cookie = `authToken=${token}; expires=${expirationDate.toUTCString()}; path=/; Secure; SameSite=Strict`;
 
-      router.push('/');
+      // Must be a full reload since we want the /me API to get called and client side state to be set in user context component
+      window.location.href = '/';
     } catch (err) {
       if (err instanceof Error) {
         console.error('Login failed:', err.message);
