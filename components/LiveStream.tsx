@@ -52,6 +52,7 @@ export default function LiveStream({
   const [inputValue, setInputValue] = useState('');
   const [chatChannel, setChatChannel] = useState<Channel | null>(null);
   const [auctionChannel, setAuctionChannel] = useState<Channel | null>(null);
+  const [privateChannel, setPrivateChannel] = useState<Channel | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   // Livestream state
@@ -184,6 +185,30 @@ export default function LiveStream({
     socket.onClose(() => console.log('Socket closed.'));
     socket.connect();
 
+    // Private channel for authenticated user
+    if (currentUser && token) {
+      const privateChannel = socket.channel(`private:${currentUser.id}`, {
+        token: token,
+      });
+      setPrivateChannel(privateChannel);
+
+      privateChannel
+        .join()
+        .receive('ok', (resp: Record<string, unknown>) =>
+          console.log('Joined private channel successfully:', resp)
+        )
+        .receive('error', (resp: Record<string, unknown>) =>
+          console.error('Unable to join private channel:', resp)
+        );
+
+      privateChannel.on(
+        'stripe_checkout',
+        (payload: { checkout_url: string }) => {
+          alert(payload.checkout_url);
+        }
+      );
+    }
+
     // Chat channel
     const newChatChannel = socket.channel(`streamer:${streamerName}`, {
       user_id: currentUser ? currentUser.id : 'anon',
@@ -298,9 +323,12 @@ export default function LiveStream({
       }
       newChatChannel.leave();
       newAuctionChannel.leave();
+      if (privateChannel) {
+        privateChannel.leave();
+      }
       socket.disconnect();
     };
-  }, [streamerName, currentUser, token, auctionId]);
+  }, [streamerName, currentUser, token, auctionId, privateChannel]);
 
   // Initialize WebRTC player
   useEffect(() => {
