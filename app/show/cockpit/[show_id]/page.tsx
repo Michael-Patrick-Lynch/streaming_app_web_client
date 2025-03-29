@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUser } from '@/context/UserContext';
 
 type Listing = {
@@ -67,6 +68,8 @@ export default function ShowCockpit() {
   const { currentUser } = useUser();
   const sellerUsername = currentUser?.username;
   const { show_id } = useParams();
+  const [auctionFailedToStartAlert, setAuctionFailedToStartAlert] =
+    useState(false);
 
   // Initialize Phoenix socket and join channel
   useEffect(() => {
@@ -157,8 +160,9 @@ export default function ShowCockpit() {
       return;
     }
 
-    // Generate a unique auction ID
-    const auctionId = `auction_${Date.now()}_${listingId}`;
+    // Auction ID is the seller username, to ensure they can
+    // only have a single auction at a time
+    const auctionId = sellerUsername;
 
     // Send start_auction message to the channel
     channel
@@ -172,6 +176,13 @@ export default function ShowCockpit() {
         // You could update UI to show the auction is active
       })
       .receive('error', (err) => {
+        if (
+          err.reason ===
+          'seller already has an active auction, you can only have 1 at a time'
+        ) {
+          setAuctionFailedToStartAlert(true);
+          setTimeout(() => setAuctionFailedToStartAlert(false), 5000);
+        }
         console.error('Failed to start auction:', err);
       });
   };
@@ -263,6 +274,15 @@ export default function ShowCockpit() {
 
   return (
     <div style={{ height: 'calc(100vh - 64px)' }} className="overflow-hidden">
+      {auctionFailedToStartAlert && (
+        <Alert className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-red-600 text-white border-red-700">
+          <AlertTitle>Cannot Start Auction</AlertTitle>
+          <AlertDescription>
+            You already have an active auction. You can only run one auction at
+            a time.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-col lg:flex-row w-full h-full">
         {/* Auction Control Panel */}
         <div className="lg:w-1/3 bg-black p-4 overflow-auto">
