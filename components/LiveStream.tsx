@@ -125,6 +125,7 @@ export default function LiveStream({
         },
         auction_id: auctionId,
         bidder_user_id: currentUser.id,
+        bidder_username: currentUser.username,
       });
     }
   };
@@ -147,6 +148,7 @@ export default function LiveStream({
         },
         auction_id: auctionId,
         bidder_user_id: currentUser.id,
+        bidder_username: currentUser.username,
       });
       setShowCustomBidInput(false);
       setCustomBidAmount('');
