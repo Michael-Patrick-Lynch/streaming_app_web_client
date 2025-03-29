@@ -13,6 +13,8 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from './ui/dialog';
 import Shop from './Shop';
 import { useUser } from '@/context/UserContext';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CheckCircle2 } from 'lucide-react';
 
 interface LiveStreamProps {
   streamUrl: string;
@@ -40,6 +42,9 @@ export default function LiveStream({
   const [auctionEndTime, setAuctionEndTime] = useState<number | null>(null);
   const [customBidAmount, setCustomBidAmount] = useState<string>('');
   const [showCustomBidInput, setShowCustomBidInput] = useState<boolean>(false);
+  const [showWinnerAlert, setShowWinnerAlert] = useState<boolean>(false);
+  const [winnerName, setWinnerName] = useState<string>('');
+  const [finalAmount, setFinalAmount] = useState<number>(0);
 
   // Livechat state
   const [viewerCount, setViewerCount] = useState(0);
@@ -276,6 +281,13 @@ export default function LiveStream({
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
+
+          if (payload.winner && payload.final_amount) {
+            setWinnerName(payload.winner);
+            setFinalAmount(payload.final_amount.amount);
+            setShowWinnerAlert(true);
+            setTimeout(() => setShowWinnerAlert(false), 5000);
+          }
         }
       }
     );
@@ -333,6 +345,18 @@ export default function LiveStream({
 
   return (
     <div className="relative w-full aspect-[9/16] bg-black">
+      {showWinnerAlert && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md">
+          <Alert className="bg-green-600 text-white border-green-700">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle>Auction Complete!</AlertTitle>
+            <AlertDescription>
+              {winnerName} won with a bid of €{formatCurrency(finalAmount)}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
