@@ -71,7 +71,26 @@ export default function ShowCockpit() {
   const [auctionFailedToStartAlert, setAuctionFailedToStartAlert] =
     useState(false);
 
-  // Initialize Phoenix socket and join channel
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [chatChannel, setChatChannel] = useState<Channel | null>(null);
+
+  // Current auction state
+  const [currentAuction, setCurrentAuction] = useState<{
+    auctionId: string;
+    listingId: string;
+    title: string;
+    description: string;
+    highestBid: number | null;
+    startingBid: number;
+    timeLeft: number;
+    bidCount: number;
+    winner: string | null;
+    finalAmount: number | null;
+  } | null>(null);
+
+  // Initialize Phoenix socket and join channels
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
     if (authToken && sellerUsername) {
@@ -84,7 +103,7 @@ export default function ShowCockpit() {
 
       phoenixSocket.connect();
 
-      // Join the auctioneer channel with seller username
+      // Join the auctioneer channel
       const auctioneerChannel = phoenixSocket.channel(
         `auctioneer:${sellerUsername}`
       );
@@ -97,8 +116,128 @@ export default function ShowCockpit() {
         .receive('error', (resp) => {
           console.error('Unable to join auctioneer channel', resp);
         });
+
+      // Join the chat channel
+      const newChatChannel = phoenixSocket.channel(
+        `streamer:${sellerUsername}`,
+        {
+          user_id: sellerUsername,
+        }
+      );
+      newChatChannel
+        .join()
+        .receive('ok', (resp) => {
+          console.log('Joined chat channel successfully:', resp);
+          setChatChannel(newChatChannel);
+        })
+        .receive('error', (resp) => {
+          console.error('Unable to join chat channel:', resp);
+        });
+
+      // Listen for chat messages
+      newChatChannel.on('new_msg', (payload: { body: string }) => {
+        setChatMessages((prev) => [...prev, payload.body]);
+      });
+
+      // Listen for auction events
+      auctioneerChannel.on(
+        'auction_started',
+        (payload: {
+          auction_id: string;
+          listing_id: string;
+          title: string;
+          description: string;
+          starting_bid: { amount: number; currency: string };
+          duration_ms: number;
+        }) => {
+          setCurrentAuction({
+            auctionId: payload.auction_id,
+            listingId: payload.listing_id,
+            title: payload.title,
+            description: payload.description,
+            highestBid: null,
+            startingBid: payload.starting_bid.amount,
+            timeLeft: Math.floor(payload.duration_ms / 1000),
+            bidCount: 0,
+            winner: null,
+            finalAmount: null,
+          });
+        }
+      );
+
+      auctioneerChannel.on(
+        'new_bid',
+        (payload: {
+          auction_id: string;
+          amount: { amount: number; currency: string };
+          bidder: string;
+        }) => {
+          setCurrentAuction((prev) => {
+            if (prev && prev.auctionId === payload.auction_id) {
+              return {
+                ...prev,
+                highestBid: payload.amount.amount,
+                bidCount: prev.bidCount + 1,
+              };
+            }
+            return prev;
+          });
+        }
+      );
+
+      auctioneerChannel.on(
+        'auction_closed',
+        (payload: {
+          auction_id: string;
+          winner: string | null;
+          final_amount: { amount: number; currency: string } | null;
+        }) => {
+          const finalAmount = payload.final_amount?.amount;
+          if (
+            payload.winner &&
+            finalAmount !== undefined &&
+            finalAmount !== null
+          ) {
+            setCurrentAuction((prev) => {
+              if (prev && prev.auctionId === payload.auction_id) {
+                return {
+                  ...prev,
+                  winner: payload.winner,
+                  finalAmount: finalAmount,
+                  timeLeft: 0,
+                };
+              }
+              return prev;
+            });
+          } else {
+            setCurrentAuction(null);
+          }
+        }
+      );
+
+      return () => {
+        auctioneerChannel.leave();
+        newChatChannel.leave();
+        phoenixSocket.disconnect();
+      };
     }
   }, [sellerUsername]);
+
+  // Update auction timer
+  useEffect(() => {
+    if (!currentAuction) return;
+
+    const timer = setInterval(() => {
+      setCurrentAuction((prev) => {
+        if (prev && prev.timeLeft > 0) {
+          return { ...prev, timeLeft: prev.timeLeft - 1 };
+        }
+        return prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentAuction]);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -272,6 +411,30 @@ export default function ShowCockpit() {
       listing.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleSendMessage = () => {
+    if (inputValue.trim() && chatChannel) {
+      chatChannel.push('new_msg', { body: inputValue });
+      setInputValue('');
+    }
+  };
+
+  const formatTimeLeft = (seconds: number) => {
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+    }).format(amount / 100);
+  };
+
   return (
     <div style={{ height: 'calc(100vh - 64px)' }} className="overflow-hidden">
       {auctionFailedToStartAlert && (
@@ -381,13 +544,73 @@ export default function ShowCockpit() {
             Live Chat & Auction Status
           </h2>
           <div className="flex-1 bg-gray-900 rounded p-4 mb-4 overflow-auto">
-            <p className="text-white">Chat messages will appear here</p>
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className="text-white mb-2">
+                <span className="text-gray-400">Anon:</span> {msg}
+              </div>
+            ))}
+          </div>
+          <div className="flex mb-4">
+            <Input
+              type="text"
+              placeholder="Type a message..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage();
+                }
+              }}
+              className="flex-1 mr-2 bg-gray-800 text-white border-gray-700"
+            />
+            <Button
+              onClick={handleSendMessage}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Send
+            </Button>
           </div>
           <div className="bg-gray-900 rounded p-4">
             <h3 className="text-lg font-semibold text-white mb-2">
               Current Auction
             </h3>
-            <p className="text-slate-400">No active auction</p>
+            {currentAuction ? (
+              <div className="text-white space-y-2">
+                <p className="font-semibold">{currentAuction.title}</p>
+                <p className="text-sm text-gray-400">
+                  {currentAuction.description}
+                </p>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p>
+                      Current Bid:{' '}
+                      {currentAuction.highestBid
+                        ? formatCurrency(currentAuction.highestBid)
+                        : formatCurrency(currentAuction.startingBid)}
+                    </p>
+                    <p>Bids: {currentAuction.bidCount}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold">
+                      {formatTimeLeft(currentAuction.timeLeft)}
+                    </p>
+                    <p className="text-sm">remaining</p>
+                  </div>
+                </div>
+                {currentAuction.winner && (
+                  <div className="mt-2 p-2 bg-green-600 rounded">
+                    <p>
+                      Winner: {currentAuction.winner} (
+                      {currentAuction.finalAmount &&
+                        formatCurrency(currentAuction.finalAmount)}
+                      )
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-slate-400">No active auction</p>
+            )}
           </div>
         </div>
       </div>
