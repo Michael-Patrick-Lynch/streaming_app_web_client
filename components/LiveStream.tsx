@@ -52,7 +52,6 @@ export default function LiveStream({
   const [inputValue, setInputValue] = useState('');
   const [chatChannel, setChatChannel] = useState<Channel | null>(null);
   const [auctionChannel, setAuctionChannel] = useState<Channel | null>(null);
-  const [privateChannel, setPrivateChannel] = useState<Channel | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   // Livestream state
@@ -186,13 +185,13 @@ export default function LiveStream({
     socket.connect();
 
     // Private channel for authenticated user
+    let privateChannelRef: Channel | null = null;
     if (currentUser && token) {
-      const privateChannel = socket.channel(`private:${currentUser.id}`, {
+      privateChannelRef = socket.channel(`private:${currentUser.id}`, {
         token: token,
       });
-      setPrivateChannel(privateChannel);
 
-      privateChannel
+      privateChannelRef
         .join()
         .receive('ok', (resp: Record<string, unknown>) =>
           console.log('Joined private channel successfully:', resp)
@@ -201,7 +200,7 @@ export default function LiveStream({
           console.error('Unable to join private channel:', resp)
         );
 
-      privateChannel.on(
+      privateChannelRef.on(
         'stripe_checkout',
         (payload: { checkout_url: string }) => {
           alert(payload.checkout_url);
@@ -323,12 +322,12 @@ export default function LiveStream({
       }
       newChatChannel.leave();
       newAuctionChannel.leave();
-      if (privateChannel) {
-        privateChannel.leave();
+      if (privateChannelRef) {
+        privateChannelRef.leave();
       }
       socket.disconnect();
     };
-  }, [streamerName, currentUser, token, auctionId, privateChannel]);
+  }, [streamerName, currentUser, token, auctionId]);
 
   // Initialize WebRTC player
   useEffect(() => {
