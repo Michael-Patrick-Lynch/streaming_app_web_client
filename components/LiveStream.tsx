@@ -203,7 +203,7 @@ export default function LiveStream({
       privateChannelRef.on(
         'stripe_checkout',
         (payload: { checkout_url: string }) => {
-          alert(payload.checkout_url);
+          window.location.href = payload.checkout_url;
         }
       );
     }
