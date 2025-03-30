@@ -23,6 +23,10 @@ const data = {
           url: '/manage-shop',
         },
         {
+          title: 'Sales',
+          url: '/manage-sales',
+        },
+        {
           title: 'Shows',
           url: '/manage-shows',
         },
