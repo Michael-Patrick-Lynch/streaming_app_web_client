@@ -12,6 +12,7 @@ import {
 } from './ui/dialog';
 import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import axios from 'axios';
 
 type BuyNowButtonProps = {
   listing: Listing;
@@ -44,9 +45,26 @@ export default function BuyNowButton({ listing, token }: BuyNowButtonProps) {
       return; // Don't submit if country not selected
     }
 
-    // Create and submit the form programmatically
-    const form = e.currentTarget;
-    form.submit();
+    axios
+      .post(
+        'https://api.firmsnap.com/stripe/checkout_session',
+        { type: 'bin', listing_id: listing.id, quantity: formState.quantity },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.data.url) {
+          window.location.href = response.data.url; // Redirect the browser
+        } else {
+          console.error('Stripe checkout URL not found in response:', response);
+        }
+      })
+      .catch((error) => {
+        console.error('Error creating checkout session:', error);
+      });
   };
 
   return (
@@ -70,12 +88,7 @@ export default function BuyNowButton({ listing, token }: BuyNowButtonProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          action="/api/stripe/create_checkout_session"
-          method="POST"
-          onSubmit={handleSubmit}
-          id="checkout-form"
-        >
+        <form onSubmit={handleSubmit} id="checkout-form">
           <input type="hidden" name="listingId" value={formState.listingId} />
           <input type="hidden" name="quantity" value={formState.quantity} />
           <input type="hidden" name="token" value={formState.token} />
