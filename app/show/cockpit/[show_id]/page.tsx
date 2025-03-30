@@ -490,6 +490,16 @@ export default function ShowCockpit() {
                       )}
                     </div>
 
+                    {listing.quantity && listing.quantity >= 1 ? (
+                      <span className="bg-green-700 text-green-200 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
+                        {listing.quantity} left
+                      </span>
+                    ) : (
+                      <span className="bg-red-800 text-red-200 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
+                        SOLD OUT
+                      </span>
+                    )}
+
                     {listing.starting_bid && (
                       <div className="text-yellow-400">
                         Starting Bid:{' '}
@@ -501,6 +511,9 @@ export default function ShowCockpit() {
                     )}
 
                     <Button
+                      disabled={
+                        listing.quantity === null || listing.quantity <= 0
+                      }
                       onClick={() => handleStartAuction(listing.id)}
                       className="mt-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
                     >
